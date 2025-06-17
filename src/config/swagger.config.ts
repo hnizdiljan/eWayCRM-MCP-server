@@ -15,7 +15,8 @@ const options: swaggerJsdoc.Options = {
         ## Funkce
         - CRUD operace pro Společnosti (Companies)
         - CRUD operace pro Kontakty (Contacts)
-        - Fulltextové vyhledávání
+        - CRUD operace pro Obchody (Deals)
+        - Fulltextové vyhledávání a filtrování
         - Stránkování výsledků
         - Automatická správa sessions k eWay-CRM
         - Validace dat pomocí Zod schémat
@@ -70,6 +71,28 @@ const options: swaggerJsdoc.Options = {
         
         // Pagination
         PaginationInfo: {
+          type: 'object',
+          properties: {
+            total: {
+              type: 'integer',
+              description: 'Celkový počet záznamů'
+            },
+            limit: {
+              type: 'integer',
+              description: 'Limit záznamů na stránku'
+            },
+            offset: {
+              type: 'integer',
+              description: 'Offset (posun) od začátku'
+            },
+            hasMore: {
+              type: 'boolean',
+              description: 'Zda existují další záznamy'
+            }
+          }
+        },
+        
+        Pagination: {
           type: 'object',
           properties: {
             total: {
@@ -448,6 +471,222 @@ const options: swaggerJsdoc.Options = {
               description: 'Zda existují další záznamy'
             }
           }
+        },
+
+        // Deal DTOs
+        Deal: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unikátní identifikátor obchodu (GUID)',
+              example: '12345678-1234-1234-1234-123456789abc'
+            },
+            projectName: {
+              type: 'string',
+              description: 'Název obchodu/projektu',
+              example: 'Nový web pro společnost'
+            },
+            fileAs: {
+              type: 'string',
+              description: 'Zobrazovaný název',
+              example: 'Web - ACME s.r.o.'
+            },
+            companyId: {
+              type: 'string',
+              description: 'ID propojené společnosti'
+            },
+            companyName: {
+              type: 'string',
+              description: 'Název propojené společnosti (readonly)',
+              example: 'ACME s.r.o.'
+            },
+            contactId: {
+              type: 'string',
+              description: 'ID propojeného kontaktu'
+            },
+            contactName: {
+              type: 'string',
+              description: 'Jméno propojeného kontaktu (readonly)',
+              example: 'Jan Novák'
+            },
+            price: {
+              type: 'number',
+              minimum: 0,
+              description: 'Cena obchodu',
+              example: 150000
+            },
+            currency: {
+              type: 'string',
+              description: 'Měna',
+              example: 'CZK'
+            },
+            probability: {
+              type: 'number',
+              minimum: 0,
+              maximum: 100,
+              description: 'Pravděpodobnost uzavření (%)',
+              example: 75
+            },
+            dealStage: {
+              type: 'string',
+              description: 'Fáze obchodu',
+              example: 'Nabídka'
+            },
+            dealType: {
+              type: 'string',
+              description: 'Typ obchodu',
+              example: 'Nový projekt'
+            },
+            startDate: {
+              type: 'string',
+              format: 'date',
+              description: 'Datum zahájení'
+            },
+            endDate: {
+              type: 'string',
+              format: 'date',
+              description: 'Datum ukončení'
+            },
+            deadlineDate: {
+              type: 'string',
+              format: 'date',
+              description: 'Termín uzavření'
+            },
+            description: {
+              type: 'string',
+              description: 'Popis obchodu',
+              example: 'Kompletní redesign webových stránek včetně e-shopu'
+            },
+            note: {
+              type: 'string',
+              description: 'Poznámky'
+            },
+            created: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Datum vytvoření'
+            },
+            modified: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Datum poslední úpravy'
+            },
+            itemVersion: {
+              type: 'integer',
+              description: 'Verze záznamu pro optimistic locking'
+            },
+            isDeleted: {
+              type: 'boolean',
+              description: 'Příznak smazání'
+            }
+          },
+          required: ['projectName']
+        },
+
+        CreateDeal: {
+          type: 'object',
+          properties: {
+            projectName: {
+              type: 'string',
+              description: 'Název obchodu/projektu (povinné)',
+              example: 'Nový web pro společnost'
+            },
+            fileAs: {
+              type: 'string',
+              description: 'Zobrazovaný název',
+              example: 'Web - ACME s.r.o.'
+            },
+            companyId: {
+              type: 'string',
+              description: 'ID propojené společnosti'
+            },
+            contactId: {
+              type: 'string',
+              description: 'ID propojeného kontaktu'
+            },
+            price: {
+              type: 'number',
+              minimum: 0,
+              description: 'Cena obchodu',
+              example: 150000
+            },
+            currency: {
+              type: 'string',
+              description: 'Měna',
+              example: 'CZK'
+            },
+            probability: {
+              type: 'number',
+              minimum: 0,
+              maximum: 100,
+              description: 'Pravděpodobnost uzavření (%)',
+              example: 75
+            },
+            dealStage: {
+              type: 'string',
+              description: 'Fáze obchodu',
+              example: 'Nabídka'
+            },
+            dealType: {
+              type: 'string',
+              description: 'Typ obchodu',
+              example: 'Nový projekt'
+            },
+            startDate: {
+              type: 'string',
+              format: 'date',
+              description: 'Datum zahájení'
+            },
+            endDate: {
+              type: 'string',
+              format: 'date',
+              description: 'Datum ukončení'
+            },
+            deadlineDate: {
+              type: 'string',
+              format: 'date',
+              description: 'Termín uzavření'
+            },
+            description: {
+              type: 'string',
+              description: 'Popis obchodu',
+              example: 'Kompletní redesign webových stránek včetně e-shopu'
+            },
+            note: {
+              type: 'string',
+              description: 'Poznámky'
+            }
+          },
+          required: ['projectName']
+        },
+
+        DealsResponse: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Deal'
+              }
+            },
+            total: {
+              type: 'integer',
+              description: 'Celkový počet záznamů'
+            },
+            limit: {
+              type: 'integer',
+              description: 'Limit záznamů na stránku'
+            },
+            offset: {
+              type: 'integer',
+              description: 'Offset (posun) od začátku'
+            },
+            hasMore: {
+              type: 'boolean',
+              description: 'Zda existují další záznamy'
+            }
+          }
         }
       },
       
@@ -492,6 +731,17 @@ const options: swaggerJsdoc.Options = {
             format: 'uuid'
           },
           example: '12345678-1234-1234-1234-123456789abc'
+        },
+        CompanyIdParam: {
+          name: 'companyId',
+          in: 'path',
+          required: true,
+          description: 'Unikátní identifikátor společnosti (GUID)',
+          schema: {
+            type: 'string',
+            format: 'uuid'
+          },
+          example: '12345678-1234-1234-1234-123456789abc'
         }
       }
     },
@@ -505,6 +755,10 @@ const options: swaggerJsdoc.Options = {
         description: 'Správa kontaktů'
       },
       {
+        name: 'Deals',
+        description: 'Správa obchodů a příležitostí'
+      },
+      {
         name: 'System',
         description: 'Systémové endpointy'
       }
@@ -512,6 +766,7 @@ const options: swaggerJsdoc.Options = {
   },
   apis: [
     './src/routes/*.ts',
+    './src/routes/deal.routes.ts',
     './src/controllers/*.ts',
     './src/index.ts'
   ]

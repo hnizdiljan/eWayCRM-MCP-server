@@ -94,8 +94,60 @@ try {
     Write-Host "❌ Contacts API Failed: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-# Test 5: eWay-CRM Connection Test
-Write-Host "`n5️⃣  eWay-CRM Connection Test..." -ForegroundColor Yellow
+# Test 5: Deals API
+Write-Host "`n5️⃣  Deals API..." -ForegroundColor Yellow
+try {
+    # CREATE Deal
+    $newDeal = @{
+        projectName = "Test Deal"
+        description = "Test obchodu pro MCP server"
+        price = 50000
+        currency = "CZK"
+        probability = 80
+        dealStage = "Nabídka"
+        dealType = "Nový projekt"
+    } | ConvertTo-Json
+    
+    $createResponse = Invoke-WebRequest -Uri "$baseUrl/api/v1/deals" -Method POST -Body $newDeal -ContentType "application/json"
+    $createdDeal = ($createResponse.Content | ConvertFrom-Json).data
+    Write-Host "✅ CREATE Deal: $($createdDeal.projectName) (ID: $($createdDeal.id))" -ForegroundColor Green
+    
+    # GET Deal by ID
+    $getResponse = Invoke-WebRequest -Uri "$baseUrl/api/v1/deals/$($createdDeal.id)"
+    $dealData = ($getResponse.Content | ConvertFrom-Json).data
+    Write-Host "✅ GET Deal by ID: $($dealData.projectName)" -ForegroundColor Green
+    
+    # UPDATE Deal
+    $updateDeal = @{
+        projectName = "Updated Test Deal"
+        description = "Aktualizovaný test obchodu"
+        price = 75000
+        currency = "CZK"
+        probability = 90
+        dealStage = "Jednání"
+        dealType = "Rozšíření"
+        itemVersion = $dealData.itemVersion
+    } | ConvertTo-Json
+    
+    $updateResponse = Invoke-WebRequest -Uri "$baseUrl/api/v1/deals/$($createdDeal.id)" -Method PUT -Body $updateDeal -ContentType "application/json"
+    $updatedDeal = ($updateResponse.Content | ConvertFrom-Json).data
+    Write-Host "✅ UPDATE Deal: $($updatedDeal.projectName)" -ForegroundColor Green
+    
+    # GET All Deals
+    $allDealsResponse = Invoke-WebRequest -Uri "$baseUrl/api/v1/deals?limit=5"
+    $allDealsData = $allDealsResponse.Content | ConvertFrom-Json
+    Write-Host "✅ GET All Deals: $($allDealsData.pagination.total) deals found" -ForegroundColor Green
+    
+    # DELETE Deal
+    $deleteResponse = Invoke-WebRequest -Uri "$baseUrl/api/v1/deals/$($createdDeal.id)" -Method DELETE
+    Write-Host "✅ DELETE Deal: Successfully deleted" -ForegroundColor Green
+    
+} catch {
+    Write-Host "❌ Deals API Failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# Test 6: eWay-CRM Connection Test
+Write-Host "`n6️⃣  eWay-CRM Connection Test..." -ForegroundColor Yellow
 try {
     $response = Invoke-WebRequest -Uri "$baseUrl/api/v1/test-connection"
     $data = $response.Content | ConvertFrom-Json

@@ -78,10 +78,10 @@ Po úspěšném dokončení Fáze 2 zopakujeme stejný postup pro další entity
 - [x] Vytvořit `ContactService` a `ContactController`.
 - [x] Implementovat kompletní CRUD endpointy pro `/api/v1/contacts`.
 
-### Úkol 3.2: Příležitosti (Deals/Leads) ⏳ ZBÝVÁ
-- [ ] Vytvořit DTO a mapovací funkce pro Příležitosti.
-- [ ] Vytvořit `LeadService` a `LeadController`.
-- [ ] Implementovat kompletní CRUD endpointy pro `/api/v1/deals`.
+### Úkol 3.2: Příležitosti (Deals/Leads) ✅ DOKONČENO
+- [x] Vytvořit DTO a mapovací funkce pro Příležitosti.
+- [x] Vytvořit `DealService` a `DealController`.
+- [x] Implementovat kompletní CRUD endpointy pro `/api/v1/deals`.
 
 ### Úkol 3.3: (Volitelně) Další entity ⏳ ZBÝVÁ
 - [ ] Zanalyzovat a implementovat další potřebné entity (např. Projekty, Úkoly) podle stejného vzoru.
@@ -125,6 +125,7 @@ V této fázi se zaměříme na robustnost, testování a přípravu na nasazen�
 - eWay-CRM konektor s automatickým session managementem
 - Kompletní CRUD API pro Companies (Společnosti)
 - Kompletní CRUD API pro Contacts (Kontakty)
+- **Kompletní CRUD API pro Deals (Obchody/Příležitosti)** - nově implementováno
 - Validace dat pomocí Zod
 - Centralizované logování pomocí Winston
 - Mapování dat mezi eWay a MCP formáty
@@ -136,16 +137,14 @@ V této fázi se zaměříme na robustnost, testování a přípravu na nasazen�
 - Deployment konfigurace (chybí Docker soubory)
 
 ### 📋 Zbývá implementovat:
-1. **Deals/Leads API** - další klíčová entita
-2. **Testování** - unit a integrační testy  
-3. **Docker konfigurace** - Dockerfile a docker-compose.yml
-4. **Další entity** - podle potřeby (Projekty, Úkoly, atd.)
+1. **Testování** - unit a integrační testy  
+2. **Docker konfigurace** - Dockerfile a docker-compose.yml
+3. **Další entity** - podle potřeby (Projekty, Úkoly, atd.)
 
 ### 🎯 Nejbližší kroky:
-1. Implementovat Deals API
-2. Přidat Docker konfiguraci
-3. Napsat testy
-4. Optimalizovat a rozšířit podle potřeb
+1. Přidat Docker konfiguraci
+2. Napsat testy
+3. Optimalizovat a rozšířit podle potřeb
 
 ### 🚀 Aktuální funkce projektu:
 - **API Endpointy:**
@@ -160,6 +159,12 @@ V této fázi se zaměříme na robustnost, testování a přípravu na nasazen�
   - `POST /api/v1/contacts` - vytvoření kontaktu
   - `PUT /api/v1/contacts/:id` - aktualizace kontaktu
   - `DELETE /api/v1/contacts/:id` - smazání kontaktu
+  - `GET /api/v1/deals` - seznam obchodů s vyhledáváním a stránkováním
+  - `GET /api/v1/deals/by-company/:companyId` - obchody podle společnosti
+  - `GET /api/v1/deals/:id` - detail obchodu
+  - `POST /api/v1/deals` - vytvoření obchodu
+  - `PUT /api/v1/deals/:id` - aktualizace obchodu
+  - `DELETE /api/v1/deals/:id` - smazání obchodu
   - `GET /health` - zdravotní kontrola serveru
   - `GET /api-docs` - Swagger dokumentace
 

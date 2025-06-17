@@ -1,6 +1,6 @@
 # eWay-CRM MCP Server
 
-**Model Context Protocol (MCP) server** pro integraci s eWay-CRM systémem. Poskytuje REST API pro správu společností (Companies) a kontaktů (Contacts) s plnou CRUD funkcionalitou.
+**Model Context Protocol (MCP) server** pro integraci s eWay-CRM systémem. Poskytuje REST API pro správu společností (Companies), kontaktů (Contacts) a obchodů (Deals) s plnou CRUD funkcionalitou.
 
 ## 🎯 Hlavní funkce
 
@@ -8,21 +8,22 @@
 - ✅ **Připojení k eWay-CRM** - HTTP konektor s session management
 - ✅ **Companies API** - kompletní CRUD operace (GET, POST, PUT, DELETE)
 - ✅ **Contacts API** - vytváření a čtení kontaktů (CREATE, READ)
+- ✅ **Deals API** - kompletní CRUD operace pro obchody/příležitosti 🆕
 - ✅ **REST API** - JSON responses s pagination a error handling
 - ✅ **Validation** - Zod schémata pro vstupní data
 - ✅ **Logging** - Winston logger s timestamps
 - ✅ **TypeScript** - kompletní type safety
 - ✅ **Health checks** - monitoring stavu aplikace
-- ✅ **Swagger UI** - kompletní OpenAPI dokumentace na `/api-docs` 🆕
+- ✅ **Swagger UI** - kompletní OpenAPI dokumentace na `/api-docs`
 
 ### ⚠️ **Částečně implementováno:**
 - ⚠️ **Contact UPDATE/DELETE** - problémy s eWay-CRM API metodami
 - ⚠️ **Contact Search** - SearchContacts vrací prázdné výsledky
 
 ### 🚧 **Není implementováno (mimo scope):**
-- 🚧 **Deals/Opportunities** - lze implementovat stejným způsobem
 - 🚧 **Authentication** - nyní používá API klíč v .env
 - 🚧 **Rate limiting** - pro produkci by bylo vhodné
+- 🚧 **Další entity** - Projekty, Úkoly, atd. (lze implementovat stejným způsobem)
 
 ## 🚀 Rychlé spuštění
 
@@ -87,7 +88,15 @@ curl http://localhost:3000/api/v1/companies?limit=5
 - `POST /api/v1/contacts` - Vytvoření kontaktu ✅
 - `PUT /api/v1/contacts/:id` - Aktualizace kontaktu ⚠️
 - `DELETE /api/v1/contacts/:id` - Smazání kontaktu ⚠️
-- `GET /api/v1/companies/:id/contacts` - Kontakty společnosti
+- `GET /api/v1/contacts/by-company/:companyId` - Kontakty společnosti
+
+### **Deals** 🆕
+- `GET /api/v1/deals` - Seznam obchodů s pagination
+- `GET /api/v1/deals/:id` - Detail obchodu
+- `POST /api/v1/deals` - Vytvoření obchodu ✅
+- `PUT /api/v1/deals/:id` - Aktualizace obchodu ✅  
+- `DELETE /api/v1/deals/:id` - Smazání obchodu ✅
+- `GET /api/v1/deals/by-company/:companyId` - Obchody společnosti
 
 ### **Query parametry**
 - `limit` - Počet záznamů (default: 25, max: 100)
@@ -104,23 +113,28 @@ src/
 │   └── eway.connector.ts       # Oficiální knihovna (❌ nefunkční)
 ├── controllers/
 │   ├── company.controller.ts   # Company REST endpoints
-│   └── contact.controller.ts   # Contact REST endpoints  
+│   ├── contact.controller.ts   # Contact REST endpoints
+│   └── deal.controller.ts      # Deal REST endpoints 🆕  
 ├── services/
 │   ├── company.service.ts      # Business logika pro companies
 │   ├── contact.service.ts      # Business logika pro contacts
+│   ├── deal.service.ts         # Business logika pro deals 🆕
 │   ├── config.service.ts       # Konfigurace z .env
 │   └── logger.service.ts       # Winston logging
 ├── models/
 │   ├── company.dto.ts          # Company data modely & Zod validace
 │   ├── company.mapper.ts       # eWay-CRM ↔ MCP data mapování
 │   ├── contact.dto.ts          # Contact data modely & Zod validace  
-│   └── contact.mapper.ts       # eWay-CRM ↔ Contact mapování
+│   ├── contact.mapper.ts       # eWay-CRM ↔ Contact mapování
+│   ├── deal.dto.ts             # Deal data modely & Zod validace 🆕
+│   └── deal.mapper.ts          # eWay-CRM ↔ Deal mapování 🆕
 ├── middleware/
 │   ├── logging.middleware.ts   # HTTP request logging
 │   └── validation.middleware.ts # Query & body validace
 └── routes/
     ├── company.routes.ts       # Company routy s validací
-    └── contact.routes.ts       # Contact routy s validací
+    ├── contact.routes.ts       # Contact routy s validací
+    └── deal.routes.ts          # Deal routy s validací 🆕
 ```
 
 ## 🔧 Technický stack
@@ -176,7 +190,14 @@ src/
 ✅ GET Contact by ID: User, Test  
 ⚠️ UPDATE Contact: HTTP 500 error
 
-5️⃣  eWay-CRM Connection Test...
+5️⃣  Deals API... 🆕
+✅ CREATE Deal: Test Deal (ID: xxx)
+✅ GET Deal by ID: Test Deal
+✅ UPDATE Deal: Updated Test Deal
+✅ GET All Deals: X deals found
+✅ DELETE Deal: Successfully deleted
+
+6️⃣  eWay-CRM Connection Test...
 ✅ Connection Status: success
 ✅ Message: Připojení k eWay-CRM je funkční
 
@@ -190,10 +211,11 @@ src/
 2. ✅ **eWay-CRM integrace** - funkční připojení k trial.eway-crm.com
 3. ✅ **Companies CRUD** - kompletní správa společností  
 4. ✅ **Contacts CREATE/READ** - vytváření a čtení kontaktů
-5. ✅ **TypeScript** - type-safe kód s DTO modely
-6. ✅ **Error handling** - structured error responses
-7. ✅ **Logging** - comprehensive logging with Winston
-8. ✅ **Validation** - Zod schemas pro všechny endpointy
+5. ✅ **Deals CRUD** - kompletní správa obchodů/příležitostí 🆕
+6. ✅ **TypeScript** - type-safe kód s DTO modely
+7. ✅ **Error handling** - structured error responses
+8. ✅ **Logging** - comprehensive logging with Winston
+9. ✅ **Validation** - Zod schemas pro všechny endpointy
 
 ### 🏆 **Bonus funkce:**
 - ✅ **Custom HTTP konektor** - obešel problém s oficiální knihovnou
