@@ -87,14 +87,17 @@ export function mcpContactToEwayContactUpdate(mcpContact: CreateContactDto, item
 export function createContactSearchParameters(query?: string, limit: number = 100, offset: number = 0) {
   const transmitObject: any = {};
 
-  // Pokud je zadán query, hledáme podle jména
+  // eWay-CRM SearchContacts vyžaduje alespoň jeden parametr
   if (query && query.trim()) {
-    transmitObject.FirstName = query.trim();
-  }
-
-  // Pro získání všech kontaktů bez filtru použijeme prázdný constraint
-  if (!query || !query.trim()) {
-    transmitObject.FirstName = ''; // Prázdná hodnota = bez filtru
+    // Hledáme podle křestního jména, příjmení nebo FileAs
+    const searchTerm = query.trim();
+    transmitObject.FirstName = searchTerm;
+    // Můžeme přidat i další pole pro lepší vyhledávání:
+    // transmitObject.LastName = searchTerm;
+    // transmitObject.FileAs = searchTerm;
+  } else {
+    // Pro SearchContacts bez query použijeme wildcard 
+    transmitObject.FirstName = '*'; // Wildcard pro všechny
   }
 
   return {

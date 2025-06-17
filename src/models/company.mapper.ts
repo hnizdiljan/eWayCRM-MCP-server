@@ -4,9 +4,33 @@ import { CompanyDto, EwayCompany, CreateCompanyDto } from './company.dto';
  * Konvertuje eWay-CRM společnost do MCP DTO formátu
  */
 export function ewayCompanyToMcpCompany(ewayCompany: EwayCompany): CompanyDto {
+  // Pokud je CompanyName prázdné, pokusíme se použít jiné pole jako fallback
+  let companyName = ewayCompany.CompanyName;
+  
+  if (!companyName || companyName.trim() === '') {
+    // Zkusíme FileAs
+    if (ewayCompany.FileAs && ewayCompany.FileAs.trim() !== '') {
+      companyName = ewayCompany.FileAs;
+    }
+    // Pokud ani FileAs není k dispozici, zkusíme extrahovat z emailu
+    else if (ewayCompany.Email && ewayCompany.Email.includes('@')) {
+      const domain = ewayCompany.Email.split('@')[1];
+      if (domain) {
+        // Odstraníme .com, .it apod. a převedeme na název
+        companyName = domain.split('.')[0];
+        // Velkým písmenem na začátku
+        companyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
+      }
+    }
+    // Poslední možnost - použijeme placeholder
+    if (!companyName || companyName.trim() === '') {
+      companyName = 'Neznámá společnost';
+    }
+  }
+
   return {
     id: ewayCompany.ItemGUID,
-    companyName: ewayCompany.CompanyName,
+    companyName: companyName,
     fileAs: ewayCompany.FileAs || undefined,
     phone: ewayCompany.Phone || undefined,
     email: ewayCompany.Email || undefined,

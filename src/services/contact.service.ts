@@ -30,18 +30,64 @@ export class ContactService {
     try {
       logger.debug('Získávání kontaktů', { query, limit, offset });
       
-      const searchParams = createContactSearchParameters(query, limit, offset);
-      const result = await ewayConnector.callMethod('SearchContacts', searchParams);
+      let result;
+      
+      if (query && query.trim()) {
+        // Pokud je zadán query, použijeme SearchContacts s filtrem
+        const searchParams = createContactSearchParameters(query, limit, offset);
+        result = await ewayConnector.callMethod('SearchContacts', searchParams);
+      } else {
+        // Pro získání všech kontaktů použijeme GetContacts
+        result = await ewayConnector.callMethod('GetContacts', { 
+          transmitObject: {} 
+        });
+      }
       
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při získávání kontaktů: ${result.Description}`);
       }
       
       // Mapování dat z eWay formátu do MCP formátu
-      const contacts: ContactDto[] = (result.Data || []).map((ewayContact: EwayContact) =>
+      let contacts: ContactDto[] = (result.Data || []).map((ewayContact: EwayContact) =>
         ewayContactToMcpContact(ewayContact)
       );
       
+      // Pokud používáme GetContacts, musíme implementovat client-side pagination a filtering
+      if (!query || !query.trim()) {
+        // Filtrace na základě query (pokud bylo zadáno později)
+        if (query && query.trim()) {
+          const searchTerm = query.trim().toLowerCase();
+          contacts = contacts.filter(contact => 
+            (contact.firstName && contact.firstName.toLowerCase().includes(searchTerm)) ||
+            (contact.lastName && contact.lastName.toLowerCase().includes(searchTerm)) ||
+            (contact.fullName && contact.fullName.toLowerCase().includes(searchTerm)) ||
+            (contact.email && contact.email.toLowerCase().includes(searchTerm))
+          );
+        }
+        
+        // Client-side pagination
+        const total = contacts.length;
+        const startIndex = offset;
+        const endIndex = offset + limit;
+        contacts = contacts.slice(startIndex, endIndex);
+        
+        logger.info(`Získáno ${contacts.length} kontaktů (stránkování ${startIndex}-${endIndex} z ${total})`, { 
+          total, 
+          hasQuery: !!query,
+          limit,
+          offset 
+        });
+        
+        return {
+          data: contacts,
+          total,
+          limit,
+          offset,
+          hasMore: endIndex < total
+        };
+      }
+      
+      // Pro SearchContacts (když je query) použijeme server-side výsledek
       const total = result.TotalCount || contacts.length;
       
       logger.info(`Získáno ${contacts.length} kontaktů`, { 
