@@ -25,8 +25,8 @@ export function ewayContactToMcpContact(ewayContact: EwayContact): ContactDto {
     note: ewayContact.Body || ewayContact.Note || undefined,
     
     // Propojení se společností
-    companyId: ewayContact.CompanyGUID || undefined,
-    companyName: ewayContact.CompanyName || undefined,
+    companyId: ewayContact.Companies_CompanyGuid,
+    companyName: ewayContact.CompanyName,
     
     // System fields
     created: ewayContact.DateCreated,
@@ -60,6 +60,7 @@ export function mcpContactToEwayContactTracked(mcpContact: CreateContactDto): an
   
   // Propojení se společností
   if (mcpContact.companyId) ewayData.CompanyGUID = mcpContact.companyId;
+  // companies_CompanyGuid není součást CreateContactDto, používá se pouze pro čtení
 
   return ewayData;
 }
@@ -83,21 +84,37 @@ export function mcpContactToEwayContactUpdate(mcpContact: CreateContactDto, item
 
 /**
  * Vytvoří parametr objekt pro vyhledávání kontaktů
+ * Vyhledává podle specifického typu vyhledávání
  */
-export function createContactSearchParameters(query?: string, limit: number = 100, offset: number = 0) {
+export function createContactSearchParameters(query?: string, limit: number = 100, offset: number = 0, searchType: string = 'general') {
   const transmitObject: any = {};
 
   // eWay-CRM SearchContacts vyžaduje alespoň jeden parametr
   if (query && query.trim()) {
-    // Hledáme podle křestního jména, příjmení nebo FileAs
     const searchTerm = query.trim();
-    transmitObject.FirstName = searchTerm;
-    // Můžeme přidat i další pole pro lepší vyhledávání:
-    // transmitObject.LastName = searchTerm;
-    // transmitObject.FileAs = searchTerm;
+    
+    switch (searchType) {
+      case 'email':
+        // Explicitní vyhledávání v email adresách
+        transmitObject.Email1Address = `*${searchTerm}*`;
+        break;
+      case 'fullname':
+        // Explicitní vyhledávání ve fullname (FileAs)
+        transmitObject.FileAs = `*${searchTerm}*`;
+        break;
+      default:
+        // Obecné vyhledávání - detekujeme podle obsahu
+        if (searchTerm.includes('@')) {
+          // Pokud obsahuje @, pravděpodobně jde o email
+          transmitObject.Email1Address = `*${searchTerm}*`;
+        } else {
+          // Pro jména používáme FileAs (obsahuje fullname)
+          transmitObject.FileAs = `*${searchTerm}*`;
+        }
+    }
   } else {
-    // Pro SearchContacts bez query použijeme wildcard 
-    transmitObject.FirstName = '*'; // Wildcard pro všechny
+    // Pro SearchContacts bez query použijeme wildcard pro získání všech
+    transmitObject.FirstName = '*';
   }
 
   return {

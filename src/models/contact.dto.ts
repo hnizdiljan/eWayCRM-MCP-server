@@ -82,6 +82,7 @@ export interface EwayContact {
   // Propojení
   CompanyGUID?: string;
   CompanyName?: string;
+  Companies_CompanyGuid?: string; // Skutečné pole z eWay API
   
   // Custom fields
   AdditionalFields?: {

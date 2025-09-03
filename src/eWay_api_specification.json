@@ -1,0 +1,2741 @@
+{
+	"info": {
+		"_postman_id": "c8512ae6-9c4a-412a-badf-383803432134",
+		"name": "eWay-CRM API",
+		"description": "## Basics\n\nBy default [https://free.eway-crm.com/31994](https://free.eway-crm.com/31994) endpoint is used for testing. See [https://github.com/eway-crm/php-lib](https://github.com/eway-crm/php-lib) for details.\n\nTo start calling methods you need to get new SID (session ID).\n\nLogIn (Legacy) is the old user name / password (MD5) method. That will not work if you have [Azure Login](https://kb.eway-crm.com/en/documentation/2-installation/2-3-installation-the-server-part/adjust-eway-crm-web-service-for-azure-login-office-365) integration.\n\nInstead you should rather use the new LogIn method which supports OAuth 2.0. Use Postman Authorization tab to get new token. It will work out-of box with the testing API endpoint.\n\nIf you'd like to test it with your API you need to generate ClientID / ClientSecret on your instance. Please run the following command on your eWay-CRM server database and [restart Web Service](https://kb.eway-crm.com/en/faq-1/tips/how-to-restart-eway-web-service) after it.\n\n> EXEC dbo.eWaySP_Auth_CreateClient 'Postman', '[https://oauth.pstmn.io/v1/browser-callback'](https://oauth.pstmn.io/v1/browser-callback')  \nUPDATE EWD_AuthClients SET AccessTokenLifetime = 3600 WHERE ClientName = 'Postman'  \nSELECT ClientID, ClientSecret FROM EWD_AuthClients WHERE ClientName = 'Postman' \n  \n\nThe command will create OAuth client with sliding refresh token. Sliding tokens have 15 days lifetime by default. The lifetime is automatically prolonged when new AccessToken is generated.\n\n## Return Codes\n\n| **Return Code** | **Description** |\n| --- | --- |\n| rcSuccess | The operation was completed successfully. |\n| rcGeneralError | The operation failed. Check the response description for details. |\n| rcParameterError | The supplied parameter was invalid. |\n| rcInternalError | Internal error while executing the request. |\n| rcBaseItemChangeIdNotFound | The base change ID is no longer available in ItemChanges table. eWay-CRM keeps only the last 30 days of changes in the table. You have to manually verify all items using Get methods. |\n| rcLoginFailed | Invalid credentials supplied. |\n| rcBadSession | The session is no longer valid. |\n| rcAccessDenied | The user does not have enough permissions. |\n| rcBadAccessToken | Invalid or expired access token supplied. |\n| rcOAuthRequired | Login using OAuth is requied. |",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25779392",
+		"_collection_link": "https://www.postman.com/eway-crm-developers/eway-crm/collection/6rbrjbj/eway-crm-api?action=share&source=collection_link&creator=25779392"
+	},
+	"item": [
+		{
+			"name": "Get",
+			"item": [
+				{
+					"name": "GetAdditionalFields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetAdditionalFields",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetAdditionalFields"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCalendars",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCalendars",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCalendars"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCarts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCarts",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCarts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetColumnPermissions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetColumnPermissions",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetColumnPermissions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCompanies",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCompanies",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCompanies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetContacts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true,\r\n    /* True to load profile pictures */\r\n    \"includeProfilePictures\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetContacts",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetContacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCurrencyExchangeRates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCurrencyExchangeRates",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCurrencyExchangeRates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetDocuments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetDocuments",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetDocuments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEmails",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEmails",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEmails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEnumTypes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEnumTypes",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEnumTypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEnumValues",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEnumValues",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEnumValues"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEnumValuesRelations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEnumValuesRelations",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEnumValuesRelations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetFeatures",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetFeatures",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetFeatures"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetFlows",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetFlows",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetFlows"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGlobalSettings",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetGlobalSettings",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetGlobalSettings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGoals",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetGoals",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetGoals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGoods",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetGoods",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetGoods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGoodsInCart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetGoodsInCart",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetGoodsInCart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGroups",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetGroups",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetGroups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetJournals",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetJournals",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetJournals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetLeads",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetLeads",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetLeads"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetMarketingCampaigns",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetMarketingCampaigns",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetMarketingCampaigns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetMarketingListsRecords",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetMarketingListsRecords",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetMarketingListsRecords"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetModulePermissions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetModulePermissions",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetModulePermissions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetObjectTypes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetObjectTypes",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetObjectTypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetClientVersion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n\t\"versionName\": \"ImportFromOffice365\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetClientVersion",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetClientVersion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPayments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetPayments",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetPayments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProjects",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetProjects",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetProjects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetRecurrencePatterns",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetRecurrencePatterns",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetRecurrencePatterns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSalePrices",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetSalePrices",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetSalePrices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetTasks",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetTasks",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetTasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetUsers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true,\r\n    /* True to load profile pictures */\r\n    \"includeProfilePictures\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetUsers",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetUsers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetUserSettings",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetUserSettings",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetUserSettings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetVacations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetVacations",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetVacations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetWorkflowHistoryRecords",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetWorkflowHistoryRecords",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetWorkflowHistoryRecords"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetWorkflowModels",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetWorkflowModels",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetWorkflowModels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetWorkReports",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"includeForeignKeys\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetWorkReports",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetWorkReports"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Save",
+			"item": [
+				{
+					"name": "SaveJournal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"transmitObject\": {\r\n        /* Specify ItemGUID if you need to update existing item. */\r\n        /*\"ItemGUID\": \"\",*/\r\n        /* You can specify other fields that can be obtained by Get methods. */\r\n        \"FileAs\": \"Test Journal\",\r\n        /* Fields that do not exist are ignored */\r\n        \"InvalidFieldName\": \"123\",\r\n        /* Custom fields */\r\n        \"AdditionalFields\": {\r\n            \"af_123\": \"2024-07-21\"\r\n\t\t}\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SaveJournal",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SaveJournal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SaveCart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"transmitObject\": {\r\n        /* USD currency */\r\n        \"CurrencyEn\": \"75fd014a-94f1-4281-b97c-73d31633faee\",\r\n        /* Sales invoice type */\r\n        \"TypeEn\": \"c06d165d-765b-4a93-a8b3-caf494dbbb34\",\r\n        /* Name */\r\n        \"FileAs\": \"FV20250123\",\r\n        /* Items */\r\n        \"GoodsInCart\": [\r\n            {\r\n                \"SaleCurrencyEn\": \"75fd014a-94f1-4281-b97c-73d31633faee\",\r\n                \"Code\": \"SRV001\",\r\n                \"Quantity\": 1,\r\n                \"FileAs\": \"Service 001\",\r\n                \"SalePrice\": 15,\r\n                \"Rank\": 1\r\n            },\r\n            {\r\n                \"SaleCurrencyEn\": \"75fd014a-94f1-4281-b97c-73d31633faee\",\r\n                \"Code\": \"SRV002\",\r\n                \"Quantity\": 2,\r\n                \"FileAs\": \"Service 002\",\r\n                \"SalePrice\": 25,\r\n                \"Rank\": 2\r\n            }\r\n        ],\r\n        /* Customer and superior item */\r\n        \"Companies_CustomerGuid\": \"a1234567-89ab-cdef-0123-456789abcdef\",\r\n        \"Projects_CartGuid\": \"b1234567-89ab-cdef-0123-456789abcdef\",\r\n        /* Due date and issued date */\r\n        \"ValidUntil\": \"2025-07-31\",\r\n        \"EffectiveFrom\": \"2025-07-01\",\r\n        /* Note */\r\n        \"Note\": \"Invoice for our services\",\r\n        /* Custom fields */\r\n        \"AdditionalFields\": {\r\n            \"af_123\": \"abc\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SaveCart",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SaveCart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SaveUser",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"transmitObject\": {\r\n        /* Specify ItemGUID if you need to update existing item. */\r\n        \"ItemGUID\": \"dcd4897d-1ec5-4c8a-9aca-7ae19487151c\",\r\n        /* Set IsActive to false to deactivate the user. */\r\n        \"IsActive\": false\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SaveUser",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SaveUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SaveRelation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"transmitObject\": {\r\n        /* ItemGUID of the first item. When creating 1:N relation use child item (eg. Project). */\r\n        \"ItemGUID1\": \"92832c76-dc36-4782-9210-eacc579c14a0\",\r\n        /* ItemGUID of the second item. When creating 1:N relation use parent item (eg. Company as Customer). */\r\n        \"ItemGUID2\": \"6dbd9de6-d25b-11e6-a9bb-080027808037\",\r\n        /* Name of the folders see https://github.com/eway-crm/php-lib/blob/master/FolderNames.md for details */\r\n        \"FolderName1\": \"Companies\",\r\n        \"FolderName2\": \"Groups\",\r\n        /* For a general relation use GENERAL, for categories use GROUP, for custom fields use AF_XXX. */\r\n        \"RelationType\": \"GROUP\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SaveRelation",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SaveRelation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SaveEnumValue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"transmitObject\": {\r\n        /* Specify ItemGUID if you need to update existing item. */\r\n        /*\"ItemGUID\": \"\",*/\r\n        /* You can specify other fields that can be obtained by Get methods. */\r\n        \"EnumType\": \"aa493dde-138a-4920-9d40-eae5461907a6\",\r\n        \"FileAs\": \"B\",\r\n        /* Translations */\r\n        \"En\": \"B\",\r\n        \"Cs\": \"B\",\r\n        \"Sk\": \"B\",\r\n        \"De\": \"B\",\r\n        \"No\": \"B\",\r\n        \"Ru\": \"B\",\r\n        /* You have to specify rank for new items: MAX(Rank) + 1 */\r\n        \"Rank\": 2\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SaveEnumValue",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SaveEnumValue"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GetIdentifiers",
+			"item": [
+				{
+					"name": "GetContactsIdentifiers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetContactsIdentifiers",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetContactsIdentifiers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCartsIdentifiers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCartsIdentifiers",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCartsIdentifiers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GetByItemGuids",
+			"item": [
+				{
+					"name": "GetContactsByItemGuids",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuids\": [ \"2bb13bfd-8d0a-40c4-a905-5ce48030f362\" ],\r\n    \"includeForeignKeys\": true,\r\n    /* Enable to get also list of relations. Use only when required, it may slow down the queries. */\r\n    \"includeRelations\": false,\r\n    /* If includeRelations is on, filling this filter can reduce the loaded relations by target folder name and/or relation type. Ex. of filter value: {\"RelationType\":  \"COMPANY\", \"ForeignFolderName\": \"Companies\"} */\r\n    \"relationsFilter\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetContactsByItemGuids",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetContactsByItemGuids"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEmailsByItemGuids",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuids\": [ \"2bb13bfd-8d0a-40c4-a905-5ce48030f362\" ],\r\n    \"includeForeignKeys\": true,\r\n    /* Enable to get also list of relations. Use only when required, it may slow down the queries. */\r\n    \"includeRelations\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEmailsByItemGuids",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEmailsByItemGuids"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCartsByItemGuids",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuids\": [ \"9e9d6269-9774-11eb-9782-b42e996c1700\", \"741e09ef-2b03-11eb-bc42-b06ebfd14346\" ],\r\n    \"includeForeignKeys\": true,\r\n    /* Disable omitGoodsInCart if you do not need to load the inner items and you want better performance.  */\r\n    \"omitGoodsInCart\": false,\r\n    /* Enable to get also list of relations. Use only when required, it may slow down the queries. */\r\n    \"includeRelations\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCartsByItemGuids",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCartsByItemGuids"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "SearchCarts",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    /* Use transmitObject to specify equals search condition */\r\n    \"transmitObject\": {\r\n        /* Look only for Issued Proposals */\r\n        \"TypeEn\": \"6A779F4B-2469-4DB6-97C6-8CAE8649B704\"\r\n    },\r\n    /* When multiple values are specified in transmitObject all conditions has to match, because and operator is used, you can switch it to or */\r\n    /*\"binaryLogicalOperator\": \"or\",*/\r\n    \r\n    /* If you do not need to load GoodsInCart, you may make the query faster by omitting them */\r\n    /*\"omitGoodsInCart\": true,*/\r\n    /* Enable to get also list of relations. Use only when required, it may slow down the queries. */\r\n    \"includeRelations\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SearchCarts",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SearchCarts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SearchProjects",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    /* Use transmitObject to specify equals search condition */\r\n    \"transmitObject\": {\r\n        /* Look only for project with id number 1234 */\r\n        \"HID\": 1234\r\n    },\r\n    /* When multiple values are specified in transmitObject all conditions has to match, because and operator is used, you can switch it to or */\r\n    /*\"binaryLogicalOperator\": \"or\",*/\r\n    \r\n    /* Enable to get also list of relations. Use only when required, it may slow down the queries. */\r\n    \"includeRelations\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/SearchProjects",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"SearchProjects"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Changes",
+			"item": [
+				{
+					"name": "GetLastItemChangeId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetLastItemChangeId",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetLastItemChangeId"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBaseItemChangeId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetBaseItemChangeId",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetBaseItemChangeId"
+							]
+						},
+						"description": "Gets base item change id (the oldest, the lowest). Available since eWay-CRM 9.1."
+					},
+					"response": []
+				},
+				{
+					"name": "GetItemChangeIdentifiers",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"folderName\": \"Journal\",\r\n    /* Last stored ChangeId */\r\n    \"baseChangeId\": 18000,\r\n    /* Max ChangeId returned by GetLastItemChangeId method */\r\n    \"targetChangeId\": 18200\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetItemChangeIdentifiers",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetItemChangeIdentifiers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetChangedItems",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"folderNames\": [\r\n        \"Journal\",\r\n        \"Documents\"\r\n    ],\r\n    \"includeForeignKeys\": true,\r\n    /* Last stored ChangeId */\r\n    \"baseChangeId\": 18000,\r\n    /* Max ChangeId returned by GetLastItemChangeId method */\r\n    \"targetChangeId\": 18200\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetChangedItems",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetChangedItems"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BinaryData",
+			"item": [
+				{
+					"name": "GetLatestRevision",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"documentGuid\": \"88e7f03a-79c1-468a-b88b-f89f4f4b878a\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetLatestRevision",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetLatestRevision"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBinaryAttachment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"88e7f03a-79c1-468a-b88b-f89f4f4b878a\"\r\n    /* Specific revision of the document */\r\n    /*\"revision\": 2*/\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetBinaryAttachment",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetBinaryAttachment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBinaryAttachment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SID}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetBinaryAttachment?itemGuid=88e7f03a-79c1-468a-b88b-f89f4f4b878a&revision=2",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetBinaryAttachment"
+							],
+							"query": [
+								{
+									"key": "itemGuid",
+									"value": "88e7f03a-79c1-468a-b88b-f89f4f4b878a"
+								},
+								{
+									"key": "revision",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetBinaryAttachmentLatestRevision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SID}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetBinaryAttachmentLatestRevision?itemGuid=88e7f03a-79c1-468a-b88b-f89f4f4b878a",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetBinaryAttachmentLatestRevision"
+							],
+							"query": [
+								{
+									"key": "itemGuid",
+									"value": "88e7f03a-79c1-468a-b88b-f89f4f4b878a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetItemPreview",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"25525a34-5785-416f-ba19-09bf6d5cbe37\",\r\n    \"folderName\": \"Contacts\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetItemPreview",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetItemPreview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetItemPreview",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{SID}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetItemPreview?itemGuid=25525a34-5785-416f-ba19-09bf6d5cbe37&folderName=Contacts",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetItemPreview"
+							],
+							"query": [
+								{
+									"key": "itemGuid",
+									"value": "25525a34-5785-416f-ba19-09bf6d5cbe37"
+								},
+								{
+									"key": "folderName",
+									"value": "Contacts"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEmailMessage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"92f929c1-1bb3-4dd7-849a-cf894073ee58\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEmailMessage",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEmailMessage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAllEmailAttachments",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"92f929c1-1bb3-4dd7-849a-cf894073ee58\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetAllEmailAttachments",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetAllEmailAttachments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEmailAttachment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"92f929c1-1bb3-4dd7-849a-cf894073ee58\",\r\n    \"contentId\": \"image001.png@01DACD47.6F163770\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetEmailAttachment",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetEmailAttachment"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Delete",
+			"item": [
+				{
+					"name": "DeleteJournal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"7cb95984-f452-4248-a663-dbbef696230a\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/DeleteJournal",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"DeleteJournal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteJournals",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuids\": [\"1cb95984-f452-4248-a663-dbbef696230a\", \"2cb95984-f452-4248-a663-dbbef696230b\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/DeleteJournals",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"DeleteJournals"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Unlink",
+			"item": [
+				{
+					"name": "CanUnlinkItems",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"sessionId\": \"{{SID}}\",\r\n    \"itemGuid\": \"2bf3813f-d773-11e8-806b-08606ef204e5\",\r\n    \"folderName\": \"Tasks\",\r\n    \"relatedItemGuids\": [\"ba4e446c-be54-11e9-bbfd-b06ebfd14346\"],\r\n    \"relatedFolderName\": \"Companies\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/CanUnlinkItems",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"CanUnlinkItems"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Query",
+			"item": [
+				{
+					"name": "History",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Queries changes in LastName of Contacts\r\n{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"History\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"ModifiedByGUID\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"ModifiedItemGUID\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"PrevValueVarChar\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"NewValueVarChar\"\r\n            }\r\n        ],\r\n        \"Filter\": {\r\n            \"__type\": \"AndFilterExpressionOperator:#EQ\",\r\n            \"Children\": [\r\n                {\r\n                    \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n                    \"Field\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        },\r\n                        \"Name\": \"ColumnName\"\r\n                    },\r\n                    \"Value\": \"LastName\"\r\n                },\r\n                {\r\n                    \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n                    \"Field\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        },\r\n                        \"Name\": \"ObjectTypeID\"\r\n                    },\r\n                    \"Value\": \"9\"\r\n                }\r\n            ]\r\n        },\r\n        \"Paging\": {\r\n            \"Skip\": 0,\r\n            \"Take\": 100\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/Query",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Users (Alias, Sort)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Queries Users, renames UserName to Username to be compatible with API\r\n{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"Users\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"UserName\",\r\n                \"Alias\": \"Username\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"Server_LastActivity\"\r\n            }\r\n        ],\r\n        \"Sort\":[\r\n            {\r\n                \"Field\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    },\r\n                    \"Name\": \"Server_LastActivity\"\r\n                },\r\n                \"OrderDirection\": \"Descending\"\r\n            }\r\n        ],\r\n        \"Paging\": {\r\n            \"Skip\": 0,\r\n            \"Take\": 100\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/Query",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aggregation (Max)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Queries last activity and last login of active non-system users\r\n// Aggregation functions: Count = 0, Avg = 1, Min = 2, Max = 3, Sum = 4\r\n{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"Users\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"AggregateColumn:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"AggregatedField\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Name\": \"Server_LastActivity\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    }\r\n                },\r\n                \"Function\": 3,\r\n                \"Alias\": \"LastActivity\" // Alias is required\r\n            },\r\n            {\r\n                \"__type\": \"AggregateColumn:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"AggregatedField\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Name\": \"Server_LastLogin\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    }\r\n                },\r\n                \"Function\": 3,\r\n                \"Alias\": \"LastLogin\"\r\n            }\r\n        ],\r\n        // Sort needs to be always defined otherwise data are sorted by Server_ID\r\n        \"Sort\":[\r\n            {\r\n                \"Field\": {\r\n                    \"__type\": \"AggregateColumn:#EQ\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    },\r\n                    \"AggregatedField\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Name\": \"Server_LastActivity\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        }\r\n                    },\r\n                    \"Function\": 3,\r\n                    \"Alias\": \"LastActivity\" // Alias is required\r\n                },\r\n                \"OrderDirection\": \"Descending\"\r\n            }\r\n        ],\r\n        \"Filter\": {\r\n            \"__type\": \"AndFilterExpressionOperator:#EQ\",\r\n            \"Children\": [\r\n                {\r\n                    \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n                    \"Field\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        },\r\n                        \"Name\": \"Active\"\r\n                    },\r\n                    \"Value\": \"1\"\r\n                },\r\n                {\r\n                    \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n                    \"Field\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        },\r\n                        \"Name\": \"IsSystem\"\r\n                    },\r\n                    \"Value\": \"0\"\r\n                }\r\n            ]\r\n        },\r\n        \"Paging\": {\r\n            \"Skip\": 0,\r\n            \"Take\": 1\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/Query",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TasksWithReminders (NotEquals)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Queries tasks with ReminderDate (NOT NULL)\r\n{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"Tasks\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"ItemGUID\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"Subject\"\r\n            }\r\n        ],\r\n        \"Filter\": {\r\n            \"__type\": \"NotFilterExpression:#EQ\",\r\n            \"Child\": {\r\n                \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n                \"Field\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    },\r\n                    \"Name\": \"ReminderDate\"\r\n                },\r\n                \"Value\": null\r\n            }\r\n        },\r\n        \"Paging\": {\r\n            \"Skip\": 0,\r\n            \"Take\": 100\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/Query",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invoices (EnumValues Join)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Queries invoices, joins EnumValues to get only specific item type\r\n{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"Carts\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"ItemGUID\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"FileAs\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"Join:#EQ\",\r\n                    \"ItemType\": \"EnumValues\",\r\n                    \"Key\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        },\r\n                        \"Name\": \"TypeEn\"\r\n                    },\r\n                    \"TargetColumnName\": \"ItemGUID\"\r\n                },\r\n                // English translation of the Cart Type\r\n                \"Name\": \"en\"\r\n            }\r\n        ],\r\n        \"Filter\": {\r\n            \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n            \"Field\": {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"Join:#EQ\",\r\n                    \"ItemType\": \"EnumValues\",\r\n                    \"Key\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"MainTable:#EQ\"\r\n                        },\r\n                        \"Name\": \"TypeEn\"\r\n                    },\r\n                    \"TargetColumnName\": \"ItemGUID\"\r\n                },\r\n                \"Name\": \"FileAs\"\r\n            },\r\n            // Filter by FileAs (key)\r\n            \"Value\": \"CartType - Sales invoice\"\r\n        },\r\n        \"Paging\": {\r\n            \"Skip\": 0,\r\n            \"Take\": 100\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/Query",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "QueryAmount",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Gets number of sub tasks\r\n{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"Tasks\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"ItemGUID\"\r\n            }\r\n        ],\r\n        \"Filter\": {\r\n            \"__type\": \"GreaterOrEqualFilterExpressionPredicate:#EQ\",\r\n            \"Field\": {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"Level\"\r\n            },\r\n            \"Value\": \"1\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/QueryAmount",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"QueryAmount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ContactsWithTheMostNonsystemJournalRecords (Join source, Group, Aggregation, Sort)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"query\": {\r\n        \"__type\": \"MainTableQuery:#EQ\",\r\n        \"ItemTypes\": [\r\n            \"Contacts\"\r\n        ],\r\n        \"Fields\": [\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"ItemGUID\"\r\n            },\r\n            {\r\n                \"__type\": \"Column:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"MainTable:#EQ\"\r\n                },\r\n                \"Name\": \"FileAs\"\r\n            },\r\n            {\r\n                \"__type\": \"AggregateColumn:#EQ\",\r\n                \"Source\": {\r\n                    \"__type\": \"Join:#EQ\",\r\n                    \"ItemType\": \"Journal\",\r\n                    \"Key\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Source\": {\r\n                            \"__type\": \"Join:#EQ\",\r\n                            \"ItemType\": \"vw_HUB_Relations\",\r\n                            \"Key\": {\r\n                                \"__type\": \"Column:#EQ\",\r\n                                \"Source\": {\r\n                                    \"__type\": \"MainTable:#EQ\"\r\n                                },\r\n                                \"Name\": \"ItemGUID\"\r\n                            },\r\n                            \"TargetColumnName\": \"ParentItemGUID\"\r\n                        },\r\n                        \"Name\": \"ItemGUID\"\r\n                    }\r\n                },\r\n                \"AggregatedField\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Name\": \"ItemGUID\",\r\n                    \"Source\": {\r\n                        \"__type\": \"Join:#EQ\",\r\n                        \"ItemType\": \"Journal\",\r\n                        \"Key\": {\r\n                            \"__type\": \"Column:#EQ\",\r\n                            \"Source\": {\r\n                                \"__type\": \"Join:#EQ\",\r\n                                \"ItemType\": \"vw_HUB_Relations\",\r\n                                \"Key\": {\r\n                                    \"__type\": \"Column:#EQ\",\r\n                                    \"Source\": {\r\n                                        \"__type\": \"MainTable:#EQ\"\r\n                                    },\r\n                                    \"Name\": \"ItemGUID\"\r\n                                },\r\n                                \"TargetColumnName\": \"ParentItemGUID\"\r\n                            },\r\n                            \"Name\": \"ItemGUID\"\r\n                        }\r\n                    }\r\n                },\r\n                \"Function\": 0,\r\n                \"Alias\": \"JrnCnt\"\r\n            }\r\n        ],\r\n        \"Group\": [\r\n            {\r\n                \"Field\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    },\r\n                    \"Name\": \"ItemGUID\"\r\n                }\r\n            },\r\n            {\r\n                \"Field\": {\r\n                    \"__type\": \"Column:#EQ\",\r\n                    \"Source\": {\r\n                        \"__type\": \"MainTable:#EQ\"\r\n                    },\r\n                    \"Name\": \"FileAs\"\r\n                }\r\n            }\r\n        ],\r\n        \"Sort\": [\r\n            {\r\n                \"Field\": {\r\n                    \"__type\": \"AggregateColumn:#EQ\",\r\n                    \"Source\": {\r\n                        \"__type\": \"Join:#EQ\",\r\n                        \"ItemType\": \"Journal\",\r\n                        \"Key\": {\r\n                            \"__type\": \"Column:#EQ\",\r\n                            \"Source\": {\r\n                                \"__type\": \"Join:#EQ\",\r\n                                \"ItemType\": \"vw_HUB_Relations\",\r\n                                \"Key\": {\r\n                                    \"__type\": \"Column:#EQ\",\r\n                                    \"Source\": {\r\n                                        \"__type\": \"MainTable:#EQ\"\r\n                                    },\r\n                                    \"Name\": \"ItemGUID\"\r\n                                },\r\n                                \"TargetColumnName\": \"ParentItemGUID\"\r\n                            },\r\n                            \"Name\": \"ItemGUID\"\r\n                        }\r\n                    },\r\n                    \"AggregatedField\": {\r\n                        \"__type\": \"Column:#EQ\",\r\n                        \"Name\": \"ItemGUID\",\r\n                        \"Source\": {\r\n                            \"__type\": \"Join:#EQ\",\r\n                            \"ItemType\": \"Journal\",\r\n                            \"Key\": {\r\n                                \"__type\": \"Column:#EQ\",\r\n                                \"Source\": {\r\n                                    \"__type\": \"Join:#EQ\",\r\n                                    \"ItemType\": \"vw_HUB_Relations\",\r\n                                    \"Key\": {\r\n                                        \"__type\": \"Column:#EQ\",\r\n                                        \"Source\": {\r\n                                            \"__type\": \"MainTable:#EQ\"\r\n                                        },\r\n                                        \"Name\": \"ItemGUID\"\r\n                                    },\r\n                                    \"TargetColumnName\": \"ParentItemGUID\"\r\n                                },\r\n                                \"Name\": \"ItemGUID\"\r\n                            }\r\n                        }\r\n                    },\r\n                    \"Function\": 0, // 0 = Count\r\n                    \"Alias\": \"JrnCnt\"\r\n                },\r\n                \"OrderDirection\": \"Descending\"\r\n            }\r\n        ],\r\n        \"Filter\": {\r\n            \"__type\": \"AndFilterExpressionOperator:#EQ\",\r\n            \"Children\": [\r\n                {\r\n                    \"__type\": \"NotFilterExpression:#EQ\",\r\n                    \"Child\": {\r\n                        \"__type\": \"EqualsFilterExpressionPredicate:#EQ\",\r\n                        \"Field\": {\r\n                            \"__type\": \"Column:#EQ\",\r\n                            \"Name\": \"System\",\r\n                            \"Source\": {\r\n                                \"__type\": \"Join:#EQ\",\r\n                                \"ItemType\": \"Journal\",\r\n                                \"Key\": {\r\n                                    \"__type\": \"Column:#EQ\",\r\n                                    \"Source\": {\r\n                                        \"__type\": \"Join:#EQ\",\r\n                                        \"ItemType\": \"vw_HUB_Relations\",\r\n                                        \"Key\": {\r\n                                            \"__type\": \"Column:#EQ\",\r\n                                            \"Source\": {\r\n                                                \"__type\": \"MainTable:#EQ\"\r\n                                            },\r\n                                            \"Name\": \"ItemGUID\"\r\n                                        },\r\n                                        \"TargetColumnName\": \"ParentItemGUID\"\r\n                                    },\r\n                                    \"Name\": \"ItemGUID\"\r\n                                }\r\n                            }\r\n                        },\r\n                        \"Value\": true\r\n                    }\r\n                }\r\n            ]\r\n        },\r\n        \"Paging\": {\r\n            \"Skip\": 0,\r\n            \"Take\": 1000 // Param paging\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/Query",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"Query"
+							]
+						},
+						"description": "Queries the top 1000 contacts sorted by the count of their hub-related journal records from the biggest amount."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "GetLicense",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\",\r\n    \"doReload\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetLicense",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetLicense"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetServiceAuthSettings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetServiceAuthSettings",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetServiceAuthSettings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetVersion",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetVersion",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetVersion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCurrentDbSize",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sessionId\": \"{{SID}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{WSURL}}/API.svc/GetCurrentDbSize",
+							"host": [
+								"{{WSURL}}"
+							],
+							"path": [
+								"API.svc",
+								"GetCurrentDbSize"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LogIn (Legacy)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"SID\", pm.response.json().SessionId)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Convent-Type",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userName\": \"{{USERNAME}}\",\r\n  \"passwordHash\": \"{{PASSWORDHASH}}\",\r\n  \"appVersion\": \"Postman-1.0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{WSURL}}/API.svc/LogIn",
+					"host": [
+						"{{WSURL}}"
+					],
+					"path": [
+						"API.svc",
+						"LogIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LogOut",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Convent-Type",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"sessionId\": \"{{SID}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{WSURL}}/API.svc/LogOut",
+					"host": [
+						"{{WSURL}}"
+					],
+					"path": [
+						"API.svc",
+						"LogOut"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LogIn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"SID\", pm.response.json().SessionId)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "redirect_uri",
+							"value": "https://oauth.pstmn.io/v1/browser-callback",
+							"type": "string"
+						},
+						{
+							"key": "scope",
+							"value": "api offline_access",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "{{CLIENTSECRET}}",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "{{CLIENTID}}",
+							"type": "string"
+						},
+						{
+							"key": "accessTokenUrl",
+							"value": "{{WSURL}}/auth/connect/token",
+							"type": "string"
+						},
+						{
+							"key": "authUrl",
+							"value": "{{WSURL}}/auth/connect/authorize",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Convent-Type",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userName\": \"{{USERNAME}}\",\r\n  \"appVersion\": \"Postman-1.0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{WSURL}}/API.svc/LogIn",
+					"host": [
+						"{{WSURL}}"
+					],
+					"path": [
+						"API.svc",
+						"LogIn"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "WSURL",
+			"value": "https://free.eway-crm.com/31994",
+			"type": "string"
+		},
+		{
+			"key": "USERNAME",
+			"value": "api",
+			"type": "string"
+		},
+		{
+			"key": "PASSWORDHASH",
+			"value": "470AE7216203E23E1983EF1851E72947",
+			"type": "string"
+		},
+		{
+			"key": "SID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "CLIENTID",
+			"value": "e6a37d4164f0493c9a5a2100f8bd0c0a",
+			"type": "string"
+		},
+		{
+			"key": "CLIENTSECRET",
+			"value": "6001d91cc751a733d484daad91ff1646519e76455b7ed5ae58d1a3524c2715cc",
+			"type": "string"
+		}
+	]
+}

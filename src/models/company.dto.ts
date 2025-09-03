@@ -16,6 +16,15 @@ export const CompanyDtoSchema = z.object({
   dic: z.string().optional(), // DIČ
   note: z.string().optional(),
   
+  // Nové rozšířené atributy
+  address1City: z.string().optional(), // Město v adrese
+  address1Street: z.string().optional(), // Ulice v adrese
+  address1State: z.string().optional(), // Stát/kraj v adrese
+  employeesCount: z.number().optional(), // Počet zaměstnanců
+  identificationNumber: z.string().optional(), // Identifikační číslo
+  lineOfBusiness: z.string().optional(), // Oblast podnikání
+  vatNumber: z.string().optional(), // DIČ (alternativní název)
+  
   // System fields
   created: z.string().optional(),
   modified: z.string().optional(),
@@ -59,6 +68,15 @@ export interface EwayCompany {
   IsDeleted?: boolean;
   DateCreated?: string;
   DateModified?: string;
+  
+  // Rozšířené atributy z eWay API
+  Address1City?: string;
+  Address1Street?: string;
+  Address1State?: string;
+  EmployeesCount?: number;
+  IdentificationNumber?: string;
+  LineOfBusiness?: string;
+  VATNumber?: string;
   
   // Dodatečná pole (custom fields)
   AdditionalFields?: {

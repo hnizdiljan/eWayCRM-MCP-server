@@ -25,26 +25,63 @@ export class CompanyService {
   
   /**
    * Získání všech společností s možností vyhledávání a stránkování
+   * Používá GetCompanies a provádí filtrování v paměti
    */
   public async getAll(query?: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<CompanyDto>> {
     try {
       logger.debug('Získávání společností', { query, limit, offset });
       
-      const searchParams = createSearchParameters(query, limit, offset);
-      const result = await ewayConnector.callMethod('SearchCompanies', searchParams);
+      // Debug stavu autentizace
+      const authStatus = (ewayConnector as any).getAuthStatus();
+      logger.debug('Auth Status před API voláním:', authStatus);
+      
+      // Vždy použijeme GetCompanies pro získání všech společností
+      const result = await ewayConnector.callMethod('GetCompanies', {
+        transmitObject: {},
+        includeForeignKeys: true
+      });
       
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při získávání společností: ${result.Description}`);
       }
       
       // Mapování dat z eWay formátu do MCP formátu
-      const companies: CompanyDto[] = (result.Data || []).map((ewayCompany: EwayCompany) =>
+      let companies: CompanyDto[] = (result.Data || []).map((ewayCompany: EwayCompany) =>
         ewayCompanyToMcpCompany(ewayCompany)
       );
       
-      const total = result.TotalCount || companies.length;
+      // In-memory filtrování pokud je zadán query
+      if (query && query.trim()) {
+        const searchTerm = query.trim().toLowerCase();
+        
+        companies = companies.filter(company => 
+          (company.companyName && company.companyName.toLowerCase().includes(searchTerm)) ||
+          (company.phone && company.phone.toLowerCase().includes(searchTerm)) ||
+          (company.email && company.email.toLowerCase().includes(searchTerm)) ||
+          (company.website && company.website.toLowerCase().includes(searchTerm)) ||
+          (company.address && company.address.toLowerCase().includes(searchTerm)) ||
+          (company.city && company.city.toLowerCase().includes(searchTerm)) ||
+          (company.ico && company.ico.toLowerCase().includes(searchTerm)) ||
+          (company.dic && company.dic.toLowerCase().includes(searchTerm)) ||
+          (company.note && company.note.toLowerCase().includes(searchTerm)) ||
+          // Rozšířené atributy
+          (company.address1City && company.address1City.toLowerCase().includes(searchTerm)) ||
+          (company.address1Street && company.address1Street.toLowerCase().includes(searchTerm)) ||
+          (company.address1State && company.address1State.toLowerCase().includes(searchTerm)) ||
+          (company.identificationNumber && company.identificationNumber.toLowerCase().includes(searchTerm)) ||
+          (company.lineOfBusiness && company.lineOfBusiness.toLowerCase().includes(searchTerm)) ||
+          (company.vatNumber && company.vatNumber.toLowerCase().includes(searchTerm)) ||
+          (company.employeesCount && company.employeesCount.toString().includes(searchTerm))
+        );
+      }
       
-      logger.info(`Získáno ${companies.length} společností`, { 
+      // In-memory stránkování
+      const total = companies.length;
+      const startIndex = offset;
+      const endIndex = offset + limit;
+      const paginatedCompanies = companies.slice(startIndex, endIndex);
+      
+      logger.info(`Získáno ${paginatedCompanies.length} společností (stránkování ${startIndex}-${endIndex} z ${total})`, { 
         total, 
         hasQuery: !!query,
         limit,
@@ -52,11 +89,11 @@ export class CompanyService {
       });
       
       return {
-        data: companies,
+        data: paginatedCompanies,
         total,
         limit,
         offset,
-        hasMore: (offset + limit) < total
+        hasMore: endIndex < total
       };
       
     } catch (error) {
@@ -67,28 +104,36 @@ export class CompanyService {
   
   /**
    * Získání konkrétní společnosti podle ID
+   * Používá GetCompanies a vyhledává v paměti
    */
   public async getById(id: string): Promise<CompanyDto | null> {
     try {
       logger.debug('Získávání společnosti podle ID', { id });
       
-      const getParams = createGetByIdParameters([id]);
-      const result = await ewayConnector.callMethod('SearchCompanies', getParams);
+      // Získáme všechny společnosti
+      const result = await ewayConnector.callMethod('GetCompanies', {
+        transmitObject: {},
+        includeForeignKeys: true
+      });
       
       if (result.ReturnCode !== 'rcSuccess') {
-        if (result.ReturnCode === 'rcItemNotFound') {
-          logger.warn('Společnost nebyla nalezena', { id });
-          return null;
-        }
-        throw new Error(`Chyba při získávání společnosti: ${result.Description}`);
+        throw new Error(`Chyba při získávání společností: ${result.Description}`);
       }
       
       if (!result.Data || result.Data.length === 0) {
-        logger.warn('Společnost nebyla nalezena v datech', { id });
+        logger.warn('Žádné společnosti nebyly nalezeny');
         return null;
       }
       
-      const company = ewayCompanyToMcpCompany(result.Data[0]);
+      // Najdeme společnost podle ID v paměti
+      const ewayCompany = result.Data.find((company: any) => company.ItemGUID === id);
+      
+      if (!ewayCompany) {
+        logger.warn('Společnost nebyla nalezena', { id });
+        return null;
+      }
+      
+      const company = ewayCompanyToMcpCompany(ewayCompany);
       logger.info('Společnost byla nalezena', { id, companyName: company.companyName });
       
       return company;

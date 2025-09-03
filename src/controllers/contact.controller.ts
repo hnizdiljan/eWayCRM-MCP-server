@@ -17,12 +17,29 @@ export class ContactController {
     try {
       const validatedQuery = (req as any).validatedQuery || {};
       const query = validatedQuery.q;
+      const fullname = validatedQuery.fullname;
+      const email = validatedQuery.email;
+      const companyId = validatedQuery.companyId;
       const limit = validatedQuery.limit || 25;
       const offset = validatedQuery.offset || 0;
       
-      logger.debug('Požadavek na seznam kontaktů', { query, limit, offset });
+      // Určíme, který typ vyhledávání použijeme
+      let searchTerm = query;
+      let searchType = 'general';
       
-      const result = await contactService.getAll(query, limit, offset);
+      if (fullname) {
+        searchTerm = fullname;
+        searchType = 'fullname';
+      } else if (email) {
+        searchTerm = email;
+        searchType = 'email';
+      }
+      
+      logger.debug('Požadavek na seznam kontaktů', { 
+        query, fullname, email, companyId, searchTerm, searchType, limit, offset 
+      });
+      
+      const result = await contactService.getAll(searchTerm, limit, offset, searchType, companyId);
       
       res.json({
         success: true,

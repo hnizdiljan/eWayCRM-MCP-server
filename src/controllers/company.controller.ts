@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import companyService from '../services/company.service';
 import logger from '../services/logger.service';
 import { CreateCompanyDto } from '../models/company.dto';
+import { handleApiError, createSuccessResponse, createPaginatedResponse } from '../utils/error.utils';
+import { HTTP_STATUS } from '../constants/api.constants';
+import ewayConnector from '../connectors/eway-http.connector';
 
 /**
  * Controller pro správu společností
@@ -22,31 +25,17 @@ export class CompanyController {
       
       logger.debug('Požadavek na seznam společností', { query, limit, offset });
       
+      // Debug auth status  
+      const authStatus = (ewayConnector as any).getAuthStatus();
+      console.log('🔍 AUTH STATUS:', authStatus);
+      
       const result = await companyService.getAll(query, limit, offset);
       
-      res.json({
-        success: true,
-        data: result.data,
-        pagination: {
-          total: result.total,
-          limit: result.limit,
-          offset: result.offset,
-          hasMore: result.hasMore,
-          page: Math.floor(result.offset / result.limit) + 1,
-          totalPages: Math.ceil(result.total / result.limit)
-        }
-      });
+      const response = createPaginatedResponse(result.data, result.total, result.limit, result.offset);
+      res.status(HTTP_STATUS.OK).json(response);
       
     } catch (error) {
-      logger.error('Chyba při získávání seznamu společností', error);
-      res.status(500).json({
-        success: false,
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Chyba při získávání společností',
-          details: error instanceof Error ? error.message : 'Neznámá chyba'
-        }
-      });
+      handleApiError(error, res, 'Získávání společností');
     }
   }
   
@@ -63,31 +52,16 @@ export class CompanyController {
       const company = await companyService.getById(id);
       
       if (!company) {
-        res.status(404).json({
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: `Společnost s ID ${id} nebyla nalezena`
-          }
+        res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: `Společnost s ID ${id} nebyla nalezena`
         });
         return;
       }
       
-      res.json({
-        success: true,
-        data: company
-      });
+      res.status(HTTP_STATUS.OK).json(createSuccessResponse(company));
       
     } catch (error) {
-      logger.error('Chyba při získávání společnosti podle ID', error);
-      res.status(500).json({
-        success: false,
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Chyba při získávání společnosti',
-          details: error instanceof Error ? error.message : 'Neznámá chyba'
-        }
-      });
+      handleApiError(error, res, 'Získávání společnosti');
     }
   }
   
@@ -103,37 +77,12 @@ export class CompanyController {
       
       const createdCompany = await companyService.create(companyData);
       
-      res.status(201).json({
-        success: true,
-        data: createdCompany,
-        message: 'Společnost byla úspěšně vytvořena'
-      });
+      res.status(HTTP_STATUS.CREATED).json(
+        createSuccessResponse(createdCompany, 'Společnost byla úspěšně vytvořena')
+      );
       
     } catch (error) {
-      logger.error('Chyba při vytváření společnosti', error);
-      
-      // Zkontrolujeme typ chyby pro vhodnější HTTP status
-      let statusCode = 500;
-      let errorCode = 'INTERNAL_ERROR';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('povinný')) {
-          statusCode = 400;
-          errorCode = 'VALIDATION_ERROR';
-        } else if (error.message.includes('existuje')) {
-          statusCode = 409;
-          errorCode = 'CONFLICT';
-        }
-      }
-      
-      res.status(statusCode).json({
-        success: false,
-        error: {
-          code: errorCode,
-          message: 'Chyba při vytváření společnosti',
-          details: error instanceof Error ? error.message : 'Neznámá chyba'
-        }
-      });
+      handleApiError(error, res, 'Vytváření společnosti');
     }
   }
   
@@ -155,40 +104,12 @@ export class CompanyController {
       
       const updatedCompany = await companyService.update(id, companyData, itemVersion);
       
-      res.json({
-        success: true,
-        data: updatedCompany,
-        message: 'Společnost byla úspěšně aktualizována'
-      });
+      res.status(HTTP_STATUS.OK).json(
+        createSuccessResponse(updatedCompany, 'Společnost byla úspěšně aktualizována')
+      );
       
     } catch (error) {
-      logger.error('Chyba při aktualizaci společnosti', error);
-      
-      // Zkontrolujeme typ chyby pro vhodnější HTTP status
-      let statusCode = 500;
-      let errorCode = 'INTERNAL_ERROR';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('nebyla nalezena')) {
-          statusCode = 404;
-          errorCode = 'NOT_FOUND';
-        } else if (error.message.includes('byla mezitím změněna')) {
-          statusCode = 409;
-          errorCode = 'CONFLICT';
-        } else if (error.message.includes('povinný')) {
-          statusCode = 400;
-          errorCode = 'VALIDATION_ERROR';
-        }
-      }
-      
-      res.status(statusCode).json({
-        success: false,
-        error: {
-          code: errorCode,
-          message: 'Chyba při aktualizaci společnosti',
-          details: error instanceof Error ? error.message : 'Neznámá chyba'
-        }
-      });
+      handleApiError(error, res, 'Aktualizace společnosti');
     }
   }
   
@@ -204,31 +125,10 @@ export class CompanyController {
       
       await companyService.delete(id);
       
-      res.json({
-        success: true,
-        message: 'Společnost byla úspěšně smazána'
-      });
+      res.status(HTTP_STATUS.NO_CONTENT).send();
       
     } catch (error) {
-      logger.error('Chyba při mazání společnosti', error);
-      
-      // Zkontrolujeme typ chyby pro vhodnější HTTP status
-      let statusCode = 500;
-      let errorCode = 'INTERNAL_ERROR';
-      
-      if (error instanceof Error && error.message.includes('nebyla nalezena')) {
-        statusCode = 404;
-        errorCode = 'NOT_FOUND';
-      }
-      
-      res.status(statusCode).json({
-        success: false,
-        error: {
-          code: errorCode,
-          message: 'Chyba při mazání společnosti',
-          details: error instanceof Error ? error.message : 'Neznámá chyba'
-        }
-      });
+      handleApiError(error, res, 'Mazání společnosti');
     }
   }
 }

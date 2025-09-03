@@ -38,7 +38,9 @@ Vytvořte `.env` soubor:
 # eWay-CRM API konfigurace
 EWAY_API_URL=https://trial.eway-crm.com/31994
 EWAY_USERNAME=api
-EWAY_PASSWORD_HASH=470AE7216203E23E1983EF1851E72947
+EWAY_PASSWORD=your-password-here  # 🆕 Doporučeno: plaintext heslo (automaticky se hashuje)
+# nebo
+# EWAY_PASSWORD_HASH=470AE7216203E23E1983EF1851E72947  # MD5 hash hesla
 
 # Server konfigurace
 PORT=3000
@@ -50,6 +52,11 @@ APP_VERSION=MCP-Server-1.0
 CLIENT_MACHINE_NAME=MCP-Server
 CLIENT_MACHINE_IDENTIFIER=AA:BB:CC:DD:EE:FF
 ```
+
+**🆕 Automatické hashování hesla:**
+- Můžete použít `EWAY_PASSWORD` s heslem v plaintextu - aplikace si automaticky vytvoří MD5 hash
+- Nebo můžete použít `EWAY_PASSWORD_HASH` s již hashovaným heslem
+- Aplikace automaticky detekuje formát a zpracuje ho správně
 
 ### 3. Build & Spuštění
 ```bash
@@ -108,14 +115,17 @@ curl http://localhost:3000/api/v1/companies?limit=5
 ```
 src/
 ├── index.ts                    # Express server setup
+├── constants/
+│   └── api.constants.ts        # API konstanty a konfigurace 🆕
 ├── connectors/
 │   ├── eway-http.connector.ts  # HTTP konektor k eWay-CRM (✅ funkční)
 │   └── eway.connector.ts       # Oficiální knihovna (❌ nefunkční)
 ├── controllers/
-│   ├── company.controller.ts   # Company REST endpoints
+│   ├── company.controller.ts   # Company REST endpoints (refactored)
 │   ├── contact.controller.ts   # Contact REST endpoints
 │   └── deal.controller.ts      # Deal REST endpoints 🆕  
 ├── services/
+│   ├── base.service.ts         # Základní service třída 🆕
 │   ├── company.service.ts      # Business logika pro companies
 │   ├── contact.service.ts      # Business logika pro contacts
 │   ├── deal.service.ts         # Business logika pro deals 🆕
@@ -131,10 +141,14 @@ src/
 ├── middleware/
 │   ├── logging.middleware.ts   # HTTP request logging
 │   └── validation.middleware.ts # Query & body validace
-└── routes/
-    ├── company.routes.ts       # Company routy s validací
-    ├── contact.routes.ts       # Contact routy s validací
-    └── deal.routes.ts          # Deal routy s validací 🆕
+├── routes/
+│   ├── company.routes.ts       # Company routy s validací
+│   ├── contact.routes.ts       # Contact routy s validací
+│   └── deal.routes.ts          # Deal routy s validací 🆕
+└── utils/                       # Pomocné utility 🆕
+    ├── error.utils.ts          # Error handling utility
+    ├── validation.utils.ts     # Validační utility  
+    └── cache.utils.ts          # Cache management
 ```
 
 ## 🔧 Technický stack
@@ -145,6 +159,13 @@ src/
 - **Zod** - Schema validace a TypeScript typy
 - **Winston** - Structured logging
 - **eWay-CRM REST API** - Data source
+
+### 🆕 **Nově přidané funkce po refactoringu:**
+- **Base Service** - Abstraktní třída pro sdílení společné logiky
+- **Konstanty** - Centralizované API konstanty a konfigurace
+- **Error Utils** - Jednotné zpracování chyb
+- **Validation Utils** - Pomocné funkce pro validaci
+- **Cache Utils** - Jednoduchá in-memory cache
 
 ## 🐛 Známé problémy a řešení
 
@@ -223,6 +244,9 @@ src/
 - ✅ **Health checks** - monitoring endpointy
 - ✅ **Test suite** - automatické testování všech endpointů
 - ✅ **Configuration service** - centralizovaná konfigurace
+- ✅ **Refactoring** - zlepšená struktura kódu, DRY principy 🆕
+- ✅ **Error handling** - jednotné zpracování chyb 🆕
+- ✅ **Utility funkce** - pomocné funkce pro validaci a cache 🆕
 
 ### 📈 **Připraveno pro rozšíření:**
 - 🔧 **Deals/Opportunities** - implementace stejným způsobem

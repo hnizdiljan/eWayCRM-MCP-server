@@ -25,23 +25,17 @@ export class ContactService {
   
   /**
    * Získání všech kontaktů s možností vyhledávání a stránkování
+   * Používá GetContacts a provádí filtrování v paměti
    */
-  public async getAll(query?: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<ContactDto>> {
+  public async getAll(query?: string, limit: number = 25, offset: number = 0, searchType: string = 'general', companyId?: string): Promise<PaginatedResult<ContactDto>> {
     try {
-      logger.debug('Získávání kontaktů', { query, limit, offset });
+      logger.debug('Získávání kontaktů', { query, limit, offset, searchType, companyId });
       
-      let result;
-      
-      if (query && query.trim()) {
-        // Pokud je zadán query, použijeme SearchContacts s filtrem
-        const searchParams = createContactSearchParameters(query, limit, offset);
-        result = await ewayConnector.callMethod('SearchContacts', searchParams);
-      } else {
-        // Pro získání všech kontaktů použijeme GetContacts
-        result = await ewayConnector.callMethod('GetContacts', { 
-          transmitObject: {} 
-        });
-      }
+      // Vždy použijeme GetContacts pro získání všech kontaktů
+      const result = await ewayConnector.callMethod('GetContacts', { 
+        transmitObject: {},
+        includeForeignKeys: true
+      });
       
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při získávání kontaktů: ${result.Description}`);
@@ -52,57 +46,61 @@ export class ContactService {
         ewayContactToMcpContact(ewayContact)
       );
       
-      // Pokud používáme GetContacts, musíme implementovat client-side pagination a filtering
-      if (!query || !query.trim()) {
-        // Filtrace na základě query (pokud bylo zadáno později)
-        if (query && query.trim()) {
-          const searchTerm = query.trim().toLowerCase();
-          contacts = contacts.filter(contact => 
-            (contact.firstName && contact.firstName.toLowerCase().includes(searchTerm)) ||
-            (contact.lastName && contact.lastName.toLowerCase().includes(searchTerm)) ||
-            (contact.fullName && contact.fullName.toLowerCase().includes(searchTerm)) ||
-            (contact.email && contact.email.toLowerCase().includes(searchTerm))
-          );
-        }
-        
-        // Client-side pagination
-        const total = contacts.length;
-        const startIndex = offset;
-        const endIndex = offset + limit;
-        contacts = contacts.slice(startIndex, endIndex);
-        
-        logger.info(`Získáno ${contacts.length} kontaktů (stránkování ${startIndex}-${endIndex} z ${total})`, { 
-          total, 
-          hasQuery: !!query,
-          limit,
-          offset 
-        });
-        
-        return {
-          data: contacts,
-          total,
-          limit,
-          offset,
-          hasMore: endIndex < total
-        };
+      // In-memory filtrování podle companyId
+      if (companyId && companyId.trim()) {
+        contacts = contacts.filter(contact => 
+          contact.companyId === companyId
+        );
       }
       
-      // Pro SearchContacts (když je query) použijeme server-side výsledek
-      const total = result.TotalCount || contacts.length;
+      // In-memory filtrování pokud je zadán query
+      if (query && query.trim()) {
+        const searchTerm = query.trim().toLowerCase();
+        
+        contacts = contacts.filter(contact => {
+          switch (searchType) {
+            case 'email':
+              return contact.email && contact.email.toLowerCase().includes(searchTerm);
+            case 'fullname':
+              return (contact.fullName && contact.fullName.toLowerCase().includes(searchTerm)) ||
+                     (contact.firstName && contact.firstName.toLowerCase().includes(searchTerm)) ||
+                     (contact.lastName && contact.lastName.toLowerCase().includes(searchTerm));
+            default:
+              // Obecné vyhledávání ve všech relevantních polích
+              return (contact.firstName && contact.firstName.toLowerCase().includes(searchTerm)) ||
+                     (contact.lastName && contact.lastName.toLowerCase().includes(searchTerm)) ||
+                     (contact.fullName && contact.fullName.toLowerCase().includes(searchTerm)) ||
+                     (contact.email && contact.email.toLowerCase().includes(searchTerm)) ||
+                     (contact.phone && contact.phone.toLowerCase().includes(searchTerm)) ||
+                     (contact.mobile && contact.mobile.toLowerCase().includes(searchTerm)) ||
+                     (contact.jobTitle && contact.jobTitle.toLowerCase().includes(searchTerm)) ||
+                     (contact.companyName && contact.companyName.toLowerCase().includes(searchTerm)) ||
+                     (contact.companyId && contact.companyId.toLowerCase().includes(searchTerm));
+          }
+        });
+      }
       
-      logger.info(`Získáno ${contacts.length} kontaktů`, { 
+      // In-memory stránkování
+      const total = contacts.length;
+      const startIndex = offset;
+      const endIndex = offset + limit;
+      const paginatedContacts = contacts.slice(startIndex, endIndex);
+      
+      logger.info(`Získáno ${paginatedContacts.length} kontaktů (stránkování ${startIndex}-${endIndex} z ${total})`, { 
         total, 
         hasQuery: !!query,
+        hasCompanyFilter: !!companyId,
+        searchType,
         limit,
         offset 
       });
       
       return {
-        data: contacts,
+        data: paginatedContacts,
         total,
         limit,
         offset,
-        hasMore: (offset + limit) < total
+        hasMore: endIndex < total
       };
       
     } catch (error) {
@@ -113,28 +111,36 @@ export class ContactService {
   
   /**
    * Získání konkrétního kontaktu podle ID
+   * Používá GetContacts a vyhledává v paměti
    */
   public async getById(id: string): Promise<ContactDto | null> {
     try {
       logger.debug('Získávání kontaktu podle ID', { id });
       
-      const getParams = createContactGetByIdParameters([id]);
-      const result = await ewayConnector.callMethod('SearchContacts', getParams);
+      // Získáme všechny kontakty
+      const result = await ewayConnector.callMethod('GetContacts', {
+        transmitObject: {},
+        includeForeignKeys: true
+      });
       
       if (result.ReturnCode !== 'rcSuccess') {
-        if (result.ReturnCode === 'rcItemNotFound') {
-          logger.warn('Kontakt nebyl nalezen', { id });
-          return null;
-        }
-        throw new Error(`Chyba při získávání kontaktu: ${result.Description}`);
+        throw new Error(`Chyba při získávání kontaktů: ${result.Description}`);
       }
       
       if (!result.Data || result.Data.length === 0) {
-        logger.warn('Kontakt nebyl nalezen v datech', { id });
+        logger.warn('Žádné kontakty nebyly nalezeny');
         return null;
       }
       
-      const contact = ewayContactToMcpContact(result.Data[0]);
+      // Najdeme kontakt podle ID v paměti
+      const ewayContact = result.Data.find((contact: any) => contact.ItemGUID === id);
+      
+      if (!ewayContact) {
+        logger.warn('Kontakt nebyl nalezen', { id });
+        return null;
+      }
+      
+      const contact = ewayContactToMcpContact(ewayContact);
       logger.info('Kontakt byl nalezen', { id, fullName: contact.fullName });
       
       return contact;

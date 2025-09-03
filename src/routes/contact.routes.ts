@@ -8,7 +8,9 @@ const router = Router();
 
 // Schéma pro validaci query parametrů při získávání seznamu
 const GetAllQuerySchema = z.object({
-  q: z.string().optional(), // Vyhledávací dotaz
+  q: z.string().optional(), // Obecný vyhledávací dotaz (zachováváme pro zpětnou kompatibilitu)
+  fullname: z.string().optional(), // Vyhledávání ve fullname (FileAs)
+  email: z.string().optional(), // Vyhledávání v email adresách
   companyId: z.string().optional(), // Filtrování podle společnosti
   limit: z.string().transform(val => parseInt(val) || 25).pipe(z.number().min(1).max(100)).optional(),
   offset: z.string().transform(val => parseInt(val) || 0).pipe(z.number().min(0)).optional()
@@ -35,10 +37,27 @@ const ByCompanyQuerySchema = z.object({
  * /api/v1/contacts:
  *   get:
  *     summary: Získání seznamu kontaktů
- *     description: Vrací seznam všech kontaktů s možností fulltextového vyhledávání, filtrování podle společnosti a stránkování
+ *     description: Vrací seznam všech kontaktů s možností vyhledávání podle jména, emailu nebo obecného dotazu
  *     tags: [Contacts]
  *     parameters:
- *       - $ref: '#/components/parameters/QueryParam'
+ *       - name: q
+ *         in: query
+ *         description: Obecný vyhledávací dotaz (zachováno pro zpětnou kompatibilitu)
+ *         schema:
+ *           type: string
+ *         example: "Jan"
+ *       - name: fullname
+ *         in: query
+ *         description: Vyhledávání v celém jméně kontaktu (jméno + příjmení)
+ *         schema:
+ *           type: string
+ *         example: "Jan Novák"
+ *       - name: email
+ *         in: query
+ *         description: Vyhledávání v email adrese kontaktu
+ *         schema:
+ *           type: string
+ *         example: "jan@example.com"
  *       - name: companyId
  *         in: query
  *         description: ID společnosti pro filtrování kontaktů

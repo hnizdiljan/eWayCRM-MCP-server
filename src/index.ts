@@ -9,6 +9,7 @@ import ewayConnector from './connectors/eway-http.connector';
 import companyRoutes from './routes/company.routes';
 import contactRoutes from './routes/contact.routes';
 import dealRoutes from './routes/deal.routes';
+import oauth2Routes from './routes/oauth2.routes';
 
 const app: Application = express();
 const { port } = configService.config.server;
@@ -88,6 +89,7 @@ app.get('/health', async (req, res) => {
 });
 
 // API routes
+app.use('/api/v1/oauth2', oauth2Routes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/contacts', contactRoutes);
 app.use('/api/v1/deals', dealRoutes);
@@ -147,6 +149,7 @@ app.get('/api/v1/test-connection', async (req, res) => {
     });
   }
 });
+
 
 // Spuštění serveru
 app.listen(port, () => {

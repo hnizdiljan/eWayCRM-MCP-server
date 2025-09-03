@@ -41,6 +41,15 @@ export function ewayCompanyToMcpCompany(ewayCompany: EwayCompany): CompanyDto {
     country: ewayCompany.BusinessAddressCountry || undefined,
     note: ewayCompany.Remark || undefined,
     
+    // Rozšířené atributy
+    address1City: ewayCompany.Address1City || undefined,
+    address1Street: ewayCompany.Address1Street || undefined,
+    address1State: ewayCompany.Address1State || undefined,
+    employeesCount: ewayCompany.EmployeesCount || undefined,
+    identificationNumber: ewayCompany.IdentificationNumber || undefined,
+    lineOfBusiness: ewayCompany.LineOfBusiness || undefined,
+    vatNumber: ewayCompany.VATNumber || undefined,
+    
     // Custom fields z AdditionalFields
     ico: ewayCompany.AdditionalFields?.cf_ICO || undefined,
     dic: ewayCompany.AdditionalFields?.cf_DIC || undefined,
@@ -71,6 +80,15 @@ export function mcpCompanyToEwayCompanyTracked(mcpCompany: CreateCompanyDto): an
   if (mcpCompany.zipCode) ewayData.BusinessAddressPostalCode = mcpCompany.zipCode;
   if (mcpCompany.country) ewayData.BusinessAddressCountry = mcpCompany.country;
   if (mcpCompany.note) ewayData.Remark = mcpCompany.note;
+
+  // Rozšířené atributy
+  if (mcpCompany.address1City) ewayData.Address1City = mcpCompany.address1City;
+  if (mcpCompany.address1Street) ewayData.Address1Street = mcpCompany.address1Street;
+  if (mcpCompany.address1State) ewayData.Address1State = mcpCompany.address1State;
+  if (mcpCompany.employeesCount !== undefined) ewayData.EmployeesCount = mcpCompany.employeesCount;
+  if (mcpCompany.identificationNumber) ewayData.IdentificationNumber = mcpCompany.identificationNumber;
+  if (mcpCompany.lineOfBusiness) ewayData.LineOfBusiness = mcpCompany.lineOfBusiness;
+  if (mcpCompany.vatNumber) ewayData.VATNumber = mcpCompany.vatNumber;
 
   // Custom fields
   if (mcpCompany.ico || mcpCompany.dic) {
