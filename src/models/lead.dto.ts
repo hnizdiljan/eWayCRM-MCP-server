@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Zod schéma pro validaci obchodu/příležitosti
-export const DealDtoSchema = z.object({
+export const LeadDtoSchema = z.object({
   id: z.string().optional(),
   projectName: z.string().min(1, 'Název obchodu je povinný'),
   fileAs: z.string().optional(),
@@ -33,7 +33,7 @@ export const DealDtoSchema = z.object({
   isDeleted: z.boolean().optional(),
 });
 
-export const CreateDealDtoSchema = DealDtoSchema.omit({
+export const CreateLeadDtoSchema = LeadDtoSchema.omit({
   id: true,
   companyName: true, // Nelze nastavit při vytváření
   contactName: true, // Nelze nastavit při vytváření
@@ -43,7 +43,7 @@ export const CreateDealDtoSchema = DealDtoSchema.omit({
   isDeleted: true,
 });
 
-export const UpdateDealDtoSchema = DealDtoSchema.omit({
+export const UpdateLeadDtoSchema = LeadDtoSchema.omit({
   id: true,
   companyName: true, // Nelze aktualizovat
   contactName: true, // Nelze aktualizovat
@@ -52,14 +52,14 @@ export const UpdateDealDtoSchema = DealDtoSchema.omit({
 }).partial();
 
 // TypeScript typy odvozené ze schémat
-export type DealDto = z.infer<typeof DealDtoSchema>;
-export type CreateDealDto = z.infer<typeof CreateDealDtoSchema>;
-export type UpdateDealDto = z.infer<typeof UpdateDealDtoSchema>;
+export type LeadDto = z.infer<typeof LeadDtoSchema>;
+export type CreateLeadDto = z.infer<typeof CreateLeadDtoSchema>;
+export type UpdateLeadDto = z.infer<typeof UpdateLeadDtoSchema>;
 
 /**
- * Rozhraní pro deal data z eWay-CRM API
+ * Rozhraní pro lead data z eWay-CRM API (Leads = Obchody/Příležitosti)
  */
-export interface EwayDeal {
+export interface EwayLead {
   ItemGUID: string;
   ItemVersion: number;
   

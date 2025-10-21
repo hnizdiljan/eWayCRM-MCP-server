@@ -15,7 +15,7 @@ const options: swaggerJsdoc.Options = {
         ## Funkce
         - CRUD operace pro Společnosti (Companies)
         - CRUD operace pro Kontakty (Contacts)
-        - CRUD operace pro Obchody (Deals)
+        - CRUD operace pro Obchody/Příležitosti (Leads)
         - Fulltextové vyhledávání a filtrování
         - Stránkování výsledků
         - Automatická správa sessions k eWay-CRM
@@ -473,8 +473,8 @@ const options: swaggerJsdoc.Options = {
           }
         },
 
-        // Deal DTOs
-        Deal: {
+        // Lead DTOs
+        Lead: {
           type: 'object',
           properties: {
             id: {
@@ -584,7 +584,7 @@ const options: swaggerJsdoc.Options = {
           required: ['projectName']
         },
 
-        CreateDeal: {
+        CreateLead: {
           type: 'object',
           properties: {
             projectName: {
@@ -661,13 +661,13 @@ const options: swaggerJsdoc.Options = {
           required: ['projectName']
         },
 
-        DealsResponse: {
+        LeadsResponse: {
           type: 'object',
           properties: {
             data: {
               type: 'array',
               items: {
-                $ref: '#/components/schemas/Deal'
+                $ref: '#/components/schemas/Lead'
               }
             },
             total: {
@@ -755,8 +755,8 @@ const options: swaggerJsdoc.Options = {
         description: 'Správa kontaktů'
       },
       {
-        name: 'Deals',
-        description: 'Správa obchodů a příležitostí'
+        name: 'Leads',
+        description: 'Správa obchodů/příležitostí (Leads)'
       },
       {
         name: 'System',
@@ -766,7 +766,7 @@ const options: swaggerJsdoc.Options = {
   },
   apis: [
     './src/routes/*.ts',
-    './src/routes/deal.routes.ts',
+    './src/routes/lead.routes.ts',
     './src/controllers/*.ts',
     './src/index.ts'
   ]

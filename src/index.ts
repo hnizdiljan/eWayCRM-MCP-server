@@ -8,7 +8,7 @@ import { loggingMiddleware } from './middleware/logging.middleware';
 import ewayConnector from './connectors/eway-http.connector';
 import companyRoutes from './routes/company.routes';
 import contactRoutes from './routes/contact.routes';
-import dealRoutes from './routes/deal.routes';
+import leadRoutes from './routes/lead.routes';
 import oauth2Routes from './routes/oauth2.routes';
 
 const app: Application = express();
@@ -92,7 +92,7 @@ app.get('/health', async (req, res) => {
 app.use('/api/v1/oauth2', oauth2Routes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/contacts', contactRoutes);
-app.use('/api/v1/deals', dealRoutes);
+app.use('/api/v1/leads', leadRoutes);
 
 /**
  * @swagger

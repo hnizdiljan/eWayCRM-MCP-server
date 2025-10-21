@@ -6,7 +6,9 @@
       "Bash(cat:*)",
       "Bash(curl:*)",
       "Bash(npm install:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(ren:*)",
+      "Bash(ren deal.mapper.ts lead.mapper.ts)"
     ],
     "deny": [],
     "ask": []

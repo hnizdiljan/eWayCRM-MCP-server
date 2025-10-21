@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import dealService from '../services/deal.service';
+import leadService from '../services/lead.service';
 import logger from '../services/logger.service';
-import { CreateDealDto } from '../models/deal.dto';
+import { CreateLeadDto } from '../models/lead.dto';
 
 /**
  * Controller pro správu obchodů/příležitostí
  * Implementuje REST API endpointy
  */
-export class DealController {
+export class LeadController {
   
   /**
    * GET /api/v1/deals
@@ -22,7 +22,7 @@ export class DealController {
       
       logger.debug('Požadavek na seznam obchodů', { query, limit, offset });
       
-      const result = await dealService.getAll(query, limit, offset);
+      const result = await leadService.getAll(query, limit, offset);
       
       res.json({
         success: true,
@@ -60,7 +60,7 @@ export class DealController {
       
       logger.debug('Požadavek na obchod podle ID', { id });
       
-      const deal = await dealService.getById(id);
+      const deal = await leadService.getById(id);
       
       if (!deal) {
         res.status(404).json({
@@ -97,11 +97,11 @@ export class DealController {
    */
   public async create(req: Request, res: Response): Promise<void> {
     try {
-      const dealData: CreateDealDto = req.body;
+      const leadData: CreateLeadDto = req.body;
       
-      logger.debug('Požadavek na vytvoření obchodu', { projectName: dealData.projectName });
+      logger.debug('Požadavek na vytvoření obchodu', { projectName: leadData.projectName });
       
-      const createdDeal = await dealService.create(dealData);
+      const createdDeal = await leadService.create(leadData);
       
       res.status(201).json({
         success: true,
@@ -144,16 +144,16 @@ export class DealController {
   public async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const dealData: CreateDealDto = req.body;
+      const leadData: CreateLeadDto = req.body;
       const itemVersion = req.body.itemVersion ? parseInt(req.body.itemVersion) : undefined;
       
       logger.debug('Požadavek na aktualizaci obchodu', { 
         id, 
-        projectName: dealData.projectName,
+        projectName: leadData.projectName,
         itemVersion 
       });
       
-      const updatedDeal = await dealService.update(id, dealData, itemVersion);
+      const updatedDeal = await leadService.update(id, leadData, itemVersion);
       
       res.json({
         success: true,
@@ -202,7 +202,7 @@ export class DealController {
       
       logger.debug('Požadavek na smazání obchodu', { id });
       
-      await dealService.delete(id);
+      await leadService.delete(id);
       
       res.status(204).send(); // No Content
       
@@ -242,7 +242,7 @@ export class DealController {
       
       logger.debug('Požadavek na obchody podle společnosti', { companyId, limit, offset });
       
-      const result = await dealService.getByCompanyId(companyId, limit, offset);
+      const result = await leadService.getByCompanyId(companyId, limit, offset);
       
       res.json({
         success: true,
@@ -272,5 +272,5 @@ export class DealController {
 }
 
 // Singleton instance
-const dealController = new DealController();
-export default dealController; 
+const leadController = new LeadController();
+export default leadController; 

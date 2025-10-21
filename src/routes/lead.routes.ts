@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import dealController from '../controllers/deal.controller';
+import leadController from '../controllers/lead.controller';
 import { validateQuery, validateBody, validateParams } from '../middleware/validation.middleware';
 import { requireAuth } from '../middleware/auth.middleware';
-import { CreateDealDtoSchema, UpdateDealDtoSchema } from '../models/deal.dto';
+import { CreateLeadDtoSchema, UpdateLeadDtoSchema } from '../models/lead.dto';
 
 const router = Router();
 
@@ -26,7 +26,7 @@ const CompanyIdParamSchema = z.object({
  * @swagger
  * components:
  *   schemas:
- *     Deal:
+ *     Lead:
  *       type: object
  *       required:
  *         - projectName
@@ -120,7 +120,7 @@ const CompanyIdParamSchema = z.object({
  *         created: "2024-01-01T10:00:00.000Z"
  *         itemVersion: 1
  *
- *     CreateDeal:
+ *     CreateLead:
  *       type: object
  *       required:
  *         - projectName
@@ -187,11 +187,11 @@ const CompanyIdParamSchema = z.object({
 
 /**
  * @swagger
- * /api/v1/deals:
+ * /api/v1/leads:
  *   get:
  *     summary: Seznam všech obchodů
  *     description: Získá seznam obchodů s možností vyhledávání a stránkování
- *     tags: [Deals]
+ *     tags: [Leads]
  *     parameters:
  *       - in: query
  *         name: q
@@ -226,7 +226,7 @@ const CompanyIdParamSchema = z.object({
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Deal'
+ *                     $ref: '#/components/schemas/Lead'
  *                 pagination:
  *                   $ref: '#/components/schemas/Pagination'
  *       500:
@@ -239,16 +239,16 @@ const CompanyIdParamSchema = z.object({
 router.get('/',
   requireAuth,
   validateQuery(SearchQuerySchema),
-  (req, res) => dealController.getAll(req, res)
+  (req, res) => leadController.getAll(req, res)
 );
 
 /**
  * @swagger
- * /api/v1/deals/by-company/{companyId}:
+ * /api/v1/leads/by-company/{companyId}:
  *   get:
  *     summary: Obchody podle společnosti
  *     description: Získá všechny obchody propojené s konkrétní společností
- *     tags: [Deals]
+ *     tags: [Leads]
  *     parameters:
  *       - $ref: '#/components/parameters/CompanyIdParam'
  *       - in: query
@@ -279,7 +279,7 @@ router.get('/',
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Deal'
+ *                     $ref: '#/components/schemas/Lead'
  *                 pagination:
  *                   $ref: '#/components/schemas/Pagination'
  *       400:
@@ -299,16 +299,16 @@ router.get('/by-company/:companyId',
   requireAuth,
   validateParams(CompanyIdParamSchema),
   validateQuery(SearchQuerySchema.omit({ q: true })),
-  (req, res) => dealController.getByCompanyId(req, res)
+  (req, res) => leadController.getByCompanyId(req, res)
 );
 
 /**
  * @swagger
- * /api/v1/deals/{id}:
+ * /api/v1/leads/{id}:
  *   get:
  *     summary: Detail obchodu
  *     description: Získá detail konkrétního obchodu podle ID
- *     tags: [Deals]
+ *     tags: [Leads]
  *     parameters:
  *       - $ref: '#/components/parameters/IdParam'
  *     responses:
@@ -322,7 +322,7 @@ router.get('/by-company/:companyId',
  *                 success:
  *                   type: boolean
  *                 data:
- *                   $ref: '#/components/schemas/Deal'
+ *                   $ref: '#/components/schemas/Lead'
  *       404:
  *         description: Obchod nebyl nalezen
  *         content:
@@ -345,22 +345,22 @@ router.get('/by-company/:companyId',
 router.get('/:id',
   requireAuth,
   validateParams(IdParamSchema),
-  (req, res) => dealController.getById(req, res)
+  (req, res) => leadController.getById(req, res)
 );
 
 /**
  * @swagger
- * /api/v1/deals:
+ * /api/v1/leads:
  *   post:
  *     summary: Vytvoření nového obchodu
  *     description: Vytvoří nový obchod v eWay-CRM
- *     tags: [Deals]
+ *     tags: [Leads]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateDeal'
+ *             $ref: '#/components/schemas/CreateLead'
  *     responses:
  *       201:
  *         description: Obchod byl úspěšně vytvořen
@@ -372,7 +372,7 @@ router.get('/:id',
  *                 success:
  *                   type: boolean
  *                 data:
- *                   $ref: '#/components/schemas/Deal'
+ *                   $ref: '#/components/schemas/Lead'
  *                 message:
  *                   type: string
  *       400:
@@ -390,17 +390,17 @@ router.get('/:id',
  */
 router.post('/',
   requireAuth,
-  validateBody(CreateDealDtoSchema),
-  (req, res) => dealController.create(req, res)
+  validateBody(CreateLeadDtoSchema),
+  (req, res) => leadController.create(req, res)
 );
 
 /**
  * @swagger
- * /api/v1/deals/{id}:
+ * /api/v1/leads/{id}:
  *   put:
  *     summary: Aktualizace obchodu
  *     description: Aktualizuje existující obchod v eWay-CRM
- *     tags: [Deals]
+ *     tags: [Leads]
  *     parameters:
  *       - $ref: '#/components/parameters/IdParam'
  *     requestBody:
@@ -408,7 +408,7 @@ router.post('/',
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateDeal'
+ *             $ref: '#/components/schemas/CreateLead'
  *     responses:
  *       200:
  *         description: Obchod byl úspěšně aktualizován
@@ -420,7 +420,7 @@ router.post('/',
  *                 success:
  *                   type: boolean
  *                 data:
- *                   $ref: '#/components/schemas/Deal'
+ *                   $ref: '#/components/schemas/Lead'
  *                 message:
  *                   type: string
  *       400:
@@ -451,17 +451,17 @@ router.post('/',
 router.put('/:id',
   requireAuth,
   validateParams(IdParamSchema),
-  validateBody(UpdateDealDtoSchema),
-  (req, res) => dealController.update(req, res)
+  validateBody(UpdateLeadDtoSchema),
+  (req, res) => leadController.update(req, res)
 );
 
 /**
  * @swagger
- * /api/v1/deals/{id}:
+ * /api/v1/leads/{id}:
  *   delete:
  *     summary: Smazání obchodu
  *     description: Označí obchod jako smazaný v eWay-CRM (soft delete)
- *     tags: [Deals]
+ *     tags: [Leads]
  *     parameters:
  *       - $ref: '#/components/parameters/IdParam'
  *     responses:
@@ -489,7 +489,7 @@ router.put('/:id',
 router.delete('/:id',
   requireAuth,
   validateParams(IdParamSchema),
-  (req, res) => dealController.delete(req, res)
+  (req, res) => leadController.delete(req, res)
 );
 
 export default router; 

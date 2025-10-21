@@ -1,13 +1,13 @@
-import { DealDto, CreateDealDto, EwayDeal } from '../models/deal.dto';
+import { LeadDto, CreateLeadDto, EwayLead } from '../models/lead.dto';
 import {
-  ewayDealToMcpDeal,
-  mcpDealToEwayDealTracked,
-  mcpDealToEwayDealUpdate,
+  ewayLeadToMcpLead,
+  mcpLeadToEwayLeadTracked,
+  mcpLeadToEwayLeadUpdate,
   createSearchParameters,
   createGetByIdParameters,
   createSaveParameters,
   createDeleteParameters
-} from '../models/deal.mapper';
+} from '../models/lead.mapper';
 import ewayConnector from '../connectors/eway-http.connector';
 import logger from './logger.service';
 
@@ -22,44 +22,64 @@ export interface PaginatedResult<T> {
 /**
  * Služba pro správu obchodů/příležitostí - implementuje CRUD operace
  */
-export class DealService {
+export class LeadService {
   
   /**
    * Získání všech obchodů s možností vyhledávání a stránkování
+   * Používá GetLeads a provádí filtrování v paměti
    */
-  public async getAll(query?: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<DealDto>> {
+  public async getAll(query?: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<LeadDto>> {
     try {
       logger.debug('Získávání obchodů', { query, limit, offset });
-      
-      const searchParams = createSearchParameters(query, limit, offset);
-      const result = await ewayConnector.callMethod('SearchItems', searchParams);
-      
+
+      // Použijeme GetLeads pro získání všech obchodů
+      const result = await ewayConnector.callMethod('GetLeads', {
+        transmitObject: {},
+        includeForeignKeys: true
+      });
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při získávání obchodů: ${result.Description}`);
       }
-      
+
       // Mapování dat z eWay formátu do MCP formátu
-      const deals: DealDto[] = (result.Data || []).map((ewayDeal: EwayDeal) =>
-        ewayDealToMcpDeal(ewayDeal)
+      let leads: LeadDto[] = (result.Data || []).map((ewayLead: EwayLead) =>
+        ewayLeadToMcpLead(ewayLead)
       );
-      
-      const total = result.TotalCount || deals.length;
-      
-      logger.info(`Získáno ${deals.length} obchodů`, { 
-        total, 
+
+      // In-memory filtrování pokud je zadán query
+      if (query && query.trim()) {
+        const searchTerm = query.trim().toLowerCase();
+        leads = leads.filter(lead =>
+          (lead.projectName && lead.projectName.toLowerCase().includes(searchTerm)) ||
+          (lead.fileAs && lead.fileAs.toLowerCase().includes(searchTerm)) ||
+          (lead.description && lead.description.toLowerCase().includes(searchTerm)) ||
+          (lead.companyName && lead.companyName.toLowerCase().includes(searchTerm)) ||
+          (lead.contactName && lead.contactName.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      // In-memory stránkování
+      const total = leads.length;
+      const startIndex = offset;
+      const endIndex = offset + limit;
+      const paginatedDeals = leads.slice(startIndex, endIndex);
+
+      logger.info(`Získáno ${paginatedDeals.length} obchodů (stránkování ${startIndex}-${endIndex} z ${total})`, {
+        total,
         hasQuery: !!query,
         limit,
-        offset 
+        offset
       });
-      
+
       return {
-        data: deals,
+        data: paginatedDeals,
         total,
         limit,
         offset,
-        hasMore: (offset + limit) < total
+        hasMore: endIndex < total
       };
-      
+
     } catch (error) {
       logger.error('Chyba při získávání obchodů', error);
       throw error;
@@ -69,7 +89,7 @@ export class DealService {
   /**
    * Získání konkrétního obchodu podle ID
    */
-  public async getById(id: string): Promise<DealDto | null> {
+  public async getById(id: string): Promise<LeadDto | null> {
     try {
       logger.debug('Získávání obchodu podle ID', { id });
       
@@ -89,10 +109,10 @@ export class DealService {
         return null;
       }
       
-      const deal = ewayDealToMcpDeal(result.Data[0]);
-      logger.info('Obchod byl nalezen', { id, projectName: deal.projectName });
+      const lead = ewayLeadToMcpLead(result.Data[0]);
+      logger.info('Obchod byl nalezen', { id, projectName: lead.projectName });
       
-      return deal;
+      return lead;
       
     } catch (error) {
       logger.error('Chyba při získávání obchodu podle ID', error);
@@ -103,11 +123,11 @@ export class DealService {
   /**
    * Vytvoření nového obchodu
    */
-  public async create(dealData: CreateDealDto): Promise<DealDto> {
+  public async create(leadData: CreateLeadDto): Promise<LeadDto> {
     try {
-      logger.debug('Vytváření nového obchodu', { projectName: dealData.projectName });
+      logger.debug('Vytváření nového obchodu', { projectName: leadData.projectName });
       
-      const ewayData = mcpDealToEwayDealTracked(dealData);
+      const ewayData = mcpLeadToEwayLeadTracked(leadData);
       const saveParams = createSaveParameters(ewayData);
       
       const result = await ewayConnector.callMethod('SaveLeads', saveParams);
@@ -142,9 +162,9 @@ export class DealService {
   /**
    * Aktualizace existujícího obchodu
    */
-  public async update(id: string, dealData: CreateDealDto, itemVersion?: number): Promise<DealDto> {
+  public async update(id: string, leadData: CreateLeadDto, itemVersion?: number): Promise<LeadDto> {
     try {
-      logger.debug('Aktualizace obchodu', { id, projectName: dealData.projectName });
+      logger.debug('Aktualizace obchodu', { id, projectName: leadData.projectName });
       
       // Nejprve ověříme, že obchod existuje
       const existingDeal = await this.getById(id);
@@ -155,7 +175,7 @@ export class DealService {
       // Použijeme ItemVersion z existujícího obchodu pokud není poskytnut
       const versionToUse = itemVersion ?? existingDeal.itemVersion;
       
-      const ewayData = mcpDealToEwayDealUpdate(dealData, id, versionToUse);
+      const ewayData = mcpLeadToEwayLeadUpdate(leadData, id, versionToUse);
       const saveParams = createSaveParameters(ewayData);
       
       const result = await ewayConnector.callMethod('SaveLeads', saveParams);
@@ -172,7 +192,7 @@ export class DealService {
         throw new Error('Obchod byl aktualizován, ale nebyla vrácena data');
       }
       
-      const updatedDeal = ewayDealToMcpDeal(result.Data[0]);
+      const updatedDeal = ewayLeadToMcpLead(result.Data[0]);
       logger.info('Obchod byl úspěšně aktualizován', { 
         id: updatedDeal.id,
         projectName: updatedDeal.projectName 
@@ -220,47 +240,53 @@ export class DealService {
 
   /**
    * Získání obchodů podle společnosti
+   * Používá GetLeads a provádí filtrování v paměti podle companyId
    */
-  public async getByCompanyId(companyId: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<DealDto>> {
+  public async getByCompanyId(companyId: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<LeadDto>> {
     try {
       logger.debug('Získávání obchodů podle společnosti', { companyId, limit, offset });
-      
-      const searchParams = {
-        transmitObject: {
-          folderName: 'Leads',
-          searchFields: { CompanyGUID: companyId },
-          maxRecords: limit,
-          skip: offset
-        }
-      };
-      
-      const result = await ewayConnector.callMethod('SearchItems', searchParams);
-      
+
+      // Použijeme GetLeads pro získání všech obchodů
+      const result = await ewayConnector.callMethod('GetLeads', {
+        transmitObject: {},
+        includeForeignKeys: true
+      });
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při získávání obchodů podle společnosti: ${result.Description}`);
       }
-      
-      const deals: DealDto[] = (result.Data || []).map((ewayDeal: EwayDeal) =>
-        ewayDealToMcpDeal(ewayDeal)
+
+      // Mapování dat z eWay formátu do MCP formátu
+      let leads: LeadDto[] = (result.Data || []).map((ewayLead: EwayLead) =>
+        ewayLeadToMcpLead(ewayLead)
       );
-      
-      const total = result.TotalCount || deals.length;
-      
-      logger.info(`Získáno ${deals.length} obchodů pro společnost`, { 
+
+      // In-memory filtrování podle companyId
+      if (companyId && companyId.trim()) {
+        leads = leads.filter(lead => lead.companyId === companyId);
+      }
+
+      // In-memory stránkování
+      const total = leads.length;
+      const startIndex = offset;
+      const endIndex = offset + limit;
+      const paginatedLeads = leads.slice(startIndex, endIndex);
+
+      logger.info(`Získáno ${paginatedLeads.length} obchodů pro společnost (stránkování ${startIndex}-${endIndex} z ${total})`, {
         companyId,
         total,
         limit,
-        offset 
+        offset
       });
-      
+
       return {
-        data: deals,
+        data: paginatedLeads,
         total,
         limit,
         offset,
-        hasMore: (offset + limit) < total
+        hasMore: endIndex < total
       };
-      
+
     } catch (error) {
       logger.error('Chyba při získávání obchodů podle společnosti', error);
       throw error;
@@ -269,5 +295,5 @@ export class DealService {
 }
 
 // Singleton instance
-const dealService = new DealService();
-export default dealService; 
+const leadService = new LeadService();
+export default leadService; 
