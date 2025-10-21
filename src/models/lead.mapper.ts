@@ -23,10 +23,10 @@ export function ewayLeadToMcpLead(ewayLead: EwayLead): LeadDto {
     endDate: ewayLead.EndDate || undefined,
     deadlineDate: ewayLead.DeadlineDate || undefined,
     
-    // Propojení
-    companyId: ewayLead.CompanyGUID || undefined,
+    // Propojení - preferujeme nové názvy polí z Swagger
+    companyId: ewayLead.Companies_CustomerGuid || ewayLead.CompanyGUID || undefined,
     companyName: ewayLead.CompanyName || undefined,
-    contactId: ewayLead.ContactGUID || undefined,
+    contactId: ewayLead.Contacts_ContactPersonGuid || ewayLead.ContactGUID || undefined,
     contactName: ewayLead.ContactName || undefined,
     
     // System fields
@@ -58,9 +58,9 @@ export function mcpLeadToEwayLeadTracked(mcpLead: CreateLeadDto): any {
   if (mcpLead.endDate) ewayData.EndDate = mcpLead.endDate;
   if (mcpLead.deadlineDate) ewayData.DeadlineDate = mcpLead.deadlineDate;
   
-  // Propojení
-  if (mcpLead.companyId) ewayData.CompanyGUID = mcpLead.companyId;
-  if (mcpLead.contactId) ewayData.ContactGUID = mcpLead.contactId;
+  // Propojení - podle Swagger: Companies_CustomerGuid a Contacts_ContactPersonGuid
+  if (mcpLead.companyId) ewayData.Companies_CustomerGuid = mcpLead.companyId;
+  if (mcpLead.contactId) ewayData.Contacts_ContactPersonGuid = mcpLead.contactId;
 
   return ewayData;
 }

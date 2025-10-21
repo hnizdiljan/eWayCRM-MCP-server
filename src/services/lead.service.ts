@@ -130,28 +130,28 @@ export class LeadService {
       const ewayData = mcpLeadToEwayLeadTracked(leadData);
       const saveParams = createSaveParameters(ewayData);
       
-      const result = await ewayConnector.callMethod('SaveLeads', saveParams);
-      
+      const result = await ewayConnector.callMethod('SaveLead', saveParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při vytváření obchodu: ${result.Description}`);
       }
-      
+
       if (!result.Guid) {
         throw new Error('Obchod byl vytvořen, ale nebyl vrácen GUID');
       }
-      
+
       // Po vytvoření načteme obchod podle GUID
-      const createdDeal = await this.getById(result.Guid!);
-      if (!createdDeal) {
+      const createdLead = await this.getById(result.Guid!);
+      if (!createdLead) {
         throw new Error('Obchod byl vytvořen, ale nelze jej načíst');
       }
       
       logger.info('Obchod byl úspěšně vytvořen', { 
-        id: createdDeal.id,
-        projectName: createdDeal.projectName 
+        id: createdLead.id,
+        projectName: createdLead.projectName 
       });
       
-      return createdDeal;
+      return createdLead;
       
     } catch (error) {
       logger.error('Chyba při vytváření obchodu', error);
@@ -167,19 +167,20 @@ export class LeadService {
       logger.debug('Aktualizace obchodu', { id, projectName: leadData.projectName });
       
       // Nejprve ověříme, že obchod existuje
-      const existingDeal = await this.getById(id);
-      if (!existingDeal) {
+      const existingLead = await this.getById(id);
+      if (!existingLead) {
         throw new Error(`Obchod s ID ${id} nebyl nalezen`);
       }
-      
+
       // Použijeme ItemVersion z existujícího obchodu pokud není poskytnut
-      const versionToUse = itemVersion ?? existingDeal.itemVersion;
-      
+      const versionToUse = itemVersion ?? existingLead.itemVersion;
+
       const ewayData = mcpLeadToEwayLeadUpdate(leadData, id, versionToUse);
       const saveParams = createSaveParameters(ewayData);
-      
-      const result = await ewayConnector.callMethod('SaveLeads', saveParams);
-      
+
+      // Používáme SaveLead místo SaveLeads
+      const result = await ewayConnector.callMethod('SaveLead', saveParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         if (result.ReturnCode === 'rcItemConflict') {
           logger.warn('Konflikt verzí při aktualizaci obchodu', { id, itemVersion: versionToUse });
@@ -187,18 +188,24 @@ export class LeadService {
         }
         throw new Error(`Chyba při aktualizaci obchodu: ${result.Description}`);
       }
-      
-      if (!result.Data || result.Data.length === 0) {
-        throw new Error('Obchod byl aktualizován, ale nebyla vrácena data');
+
+      // SaveLead vrací jen Guid, ne Data - musíme načíst obchod znovu
+      if (!result.Guid) {
+        throw new Error('Obchod byl aktualizován, ale nebyl vrácen GUID');
       }
-      
-      const updatedDeal = ewayLeadToMcpLead(result.Data[0]);
-      logger.info('Obchod byl úspěšně aktualizován', { 
-        id: updatedDeal.id,
-        projectName: updatedDeal.projectName 
+
+      // Po aktualizaci načteme obchod podle GUID pro úplná data
+      const updatedLead = await this.getById(result.Guid);
+      if (!updatedLead) {
+        throw new Error('Obchod byl aktualizován, ale nelze jej načíst');
+      }
+
+      logger.info('Obchod byl úspěšně aktualizován', {
+        id: updatedLead.id,
+        projectName: updatedLead.projectName
       });
-      
-      return updatedDeal;
+
+      return updatedLead;
       
     } catch (error) {
       logger.error('Chyba při aktualizaci obchodu', error);
@@ -207,21 +214,21 @@ export class LeadService {
   }
   
   /**
-   * Smazání obchodu pomocí DeleteLeads endpoint
+   * Smazání obchodu pomocí DeleteLead endpoint
    */
   public async delete(id: string): Promise<void> {
     try {
       logger.debug('Mazání obchodu', { id });
 
       // Nejprve ověříme, že obchod existuje
-      const existingDeal = await this.getById(id);
-      if (!existingDeal) {
+      const existingLead = await this.getById(id);
+      if (!existingLead) {
         throw new Error(`Obchod s ID ${id} nebyl nalezen`);
       }
 
-      // Použijeme dedikovaný DeleteLeads endpoint
+      // Použijeme dedikovaný DeleteLead endpoint (jednotné číslo pro konzistenci)
       const deleteParams = createDeleteParameters(id);
-      const result = await ewayConnector.callMethod('DeleteLeads', deleteParams);
+      const result = await ewayConnector.callMethod('DeleteLead', deleteParams);
 
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při mazání obchodu: ${result.Description}`);
@@ -229,7 +236,7 @@ export class LeadService {
 
       logger.info('Obchod byl úspěšně smazán', {
         id,
-        projectName: existingDeal.projectName
+        projectName: existingLead.projectName
       });
 
     } catch (error) {

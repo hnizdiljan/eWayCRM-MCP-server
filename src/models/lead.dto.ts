@@ -81,10 +81,12 @@ export interface EwayLead {
   EndDate?: string;
   DeadlineDate?: string;
   
-  // Propojení
-  CompanyGUID?: string;
+  // Propojení - podle Swagger API
+  Companies_CustomerGuid?: string; // Skutečné pole z eWay API
+  CompanyGUID?: string; // Deprecated, pro zpětnou kompatibilitu
   CompanyName?: string;
-  ContactGUID?: string;
+  Contacts_ContactPersonGuid?: string; // Skutečné pole z eWay API
+  ContactGUID?: string; // Deprecated, pro zpětnou kompatibilitu
   ContactName?: string;
   
   // Custom fields
