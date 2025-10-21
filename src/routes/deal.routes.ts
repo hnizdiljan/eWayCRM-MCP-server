@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import dealController from '../controllers/deal.controller';
 import { validateQuery, validateBody, validateParams } from '../middleware/validation.middleware';
+import { requireAuth } from '../middleware/auth.middleware';
 import { CreateDealDtoSchema, UpdateDealDtoSchema } from '../models/deal.dto';
 
 const router = Router();
@@ -236,6 +237,7 @@ const CompanyIdParamSchema = z.object({
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/',
+  requireAuth,
   validateQuery(SearchQuerySchema),
   (req, res) => dealController.getAll(req, res)
 );
@@ -294,6 +296,7 @@ router.get('/',
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/by-company/:companyId',
+  requireAuth,
   validateParams(CompanyIdParamSchema),
   validateQuery(SearchQuerySchema.omit({ q: true })),
   (req, res) => dealController.getByCompanyId(req, res)
@@ -340,6 +343,7 @@ router.get('/by-company/:companyId',
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   (req, res) => dealController.getById(req, res)
 );
@@ -385,6 +389,7 @@ router.get('/:id',
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/',
+  requireAuth,
   validateBody(CreateDealDtoSchema),
   (req, res) => dealController.create(req, res)
 );
@@ -444,6 +449,7 @@ router.post('/',
  *               $ref: '#/components/schemas/Error'
  */
 router.put('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   validateBody(UpdateDealDtoSchema),
   (req, res) => dealController.update(req, res)
@@ -481,6 +487,7 @@ router.put('/:id',
  *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   (req, res) => dealController.delete(req, res)
 );

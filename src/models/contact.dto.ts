@@ -58,26 +58,45 @@ export type UpdateContactDto = z.infer<typeof UpdateContactDtoSchema>;
 export interface EwayContact {
   ItemGUID: string;
   ItemVersion: number;
-  
+
   // Základní údaje
   FirstName: string;
   LastName: string;
   FileAs: string;
   Email1Address?: string;
+  Email2Address?: string;
+  Email3Address?: string;
+
+  // Telefony - podle Swagger API
+  TelephoneNumber1?: string;
+  TelephoneNumber2?: string;
+  TelephoneNumber3?: string;
+  TelephoneNumber4?: string;
+  TelephoneNumber5?: string;
+  TelephoneNumber6?: string;
+
+  // Starší pole (deprecated, pro zpětnou kompatibilitu)
   Phone?: string;
   Mobile?: string;
   JobTitle?: string;
+
   Department?: string;
-  
-  // Adresa
-  BusinessAddress?: string;
+
+  // Adresa - podle Swagger API
+  BusinessAddressStreet?: string;
   BusinessAddressCity?: string;
   BusinessAddressPostalCode?: string;
+  BusinessAddressPOBox?: string;
+  BusinessAddressState?: string;
+  BusinessAddressCountryEn?: string; // GUID
+
+  // Starší pole (deprecated)
+  BusinessAddress?: string;
   BusinessAddressCountry?: string;
-  
+
   // Poznámka
-  Body?: string;
   Note?: string;
+  Body?: string; // deprecated
   
   // Propojení
   CompanyGUID?: string;

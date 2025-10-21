@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import contactController from '../controllers/contact.controller';
 import { validateBody, validateQuery, validateParams } from '../middleware/validation.middleware';
+import { requireAuth } from '../middleware/auth.middleware';
 import { CreateContactDtoSchema, UpdateContactDtoSchema } from '../models/contact.dto';
 
 const router = Router();
@@ -87,7 +88,8 @@ const ByCompanyQuerySchema = z.object({
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', 
+router.get('/',
+  requireAuth,
   validateQuery(GetAllQuerySchema),
   (req, res) => contactController.getAll(req, res)
 );
@@ -131,6 +133,7 @@ router.get('/',
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/by-company/:companyId',
+  requireAuth,
   validateParams(CompanyIdParamSchema),
   validateQuery(ByCompanyQuerySchema),
   (req, res) => contactController.getByCompanyId(req, res)
@@ -172,6 +175,7 @@ router.get('/by-company/:companyId',
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   (req, res) => contactController.getById(req, res)
 );
@@ -221,6 +225,7 @@ router.get('/:id',
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/',
+  requireAuth,
   validateBody(CreateContactDtoSchema),
   (req, res) => contactController.create(req, res)
 );
@@ -282,6 +287,7 @@ router.post('/',
  *               $ref: '#/components/schemas/Error'
  */
 router.put('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   validateBody(UpdateContactDtoSchema),
   (req, res) => contactController.update(req, res)
@@ -319,6 +325,7 @@ router.put('/:id',
  *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   (req, res) => contactController.delete(req, res)
 );

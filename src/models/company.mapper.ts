@@ -35,11 +35,12 @@ export function ewayCompanyToMcpCompany(ewayCompany: EwayCompany): CompanyDto {
     phone: ewayCompany.Phone || undefined,
     email: ewayCompany.Email || undefined,
     website: ewayCompany.WebPage || undefined,
-    address: ewayCompany.BusinessAddress || undefined,
-    city: ewayCompany.BusinessAddressCity || undefined,
-    zipCode: ewayCompany.BusinessAddressPostalCode || undefined,
-    country: ewayCompany.BusinessAddressCountry || undefined,
-    note: ewayCompany.Remark || undefined,
+    // Adresní pole - čteme z Address1* podle skutečné API struktury
+    address: ewayCompany.Address1Street || undefined,
+    city: ewayCompany.Address1City || undefined,
+    zipCode: ewayCompany.Address1PostalCode || undefined,
+    country: undefined, // Address1CountryEn je GUID, ne string
+    note: ewayCompany.Note || undefined,
     
     // Rozšířené atributy
     address1City: ewayCompany.Address1City || undefined,
@@ -50,9 +51,9 @@ export function ewayCompanyToMcpCompany(ewayCompany: EwayCompany): CompanyDto {
     lineOfBusiness: ewayCompany.LineOfBusiness || undefined,
     vatNumber: ewayCompany.VATNumber || undefined,
     
-    // Custom fields z AdditionalFields
-    ico: ewayCompany.AdditionalFields?.cf_ICO || undefined,
-    dic: ewayCompany.AdditionalFields?.cf_DIC || undefined,
+    // ICO a DIC z standardních polí (AdditionalFields nefunguje přes API)
+    ico: ewayCompany.IdentificationNumber || undefined,
+    dic: ewayCompany.VATNumber || undefined,
     
     // System fields
     created: ewayCompany.DateCreated,
@@ -75,26 +76,35 @@ export function mcpCompanyToEwayCompanyTracked(mcpCompany: CreateCompanyDto): an
   if (mcpCompany.phone) ewayData.Phone = mcpCompany.phone;
   if (mcpCompany.email) ewayData.Email = mcpCompany.email;
   if (mcpCompany.website) ewayData.WebPage = mcpCompany.website;
-  if (mcpCompany.address) ewayData.BusinessAddress = mcpCompany.address;
-  if (mcpCompany.city) ewayData.BusinessAddressCity = mcpCompany.city;
-  if (mcpCompany.zipCode) ewayData.BusinessAddressPostalCode = mcpCompany.zipCode;
-  if (mcpCompany.country) ewayData.BusinessAddressCountry = mcpCompany.country;
-  if (mcpCompany.note) ewayData.Remark = mcpCompany.note;
+
+  // Adresní pole - používáme Address1* podle Swagger dokumentace
+  if (mcpCompany.address) ewayData.Address1Street = mcpCompany.address;
+  if (mcpCompany.city) ewayData.Address1City = mcpCompany.city;
+  if (mcpCompany.zipCode) ewayData.Address1PostalCode = mcpCompany.zipCode;
+  // Country je GUID podle API, ne string - zatím vynecháme
+  // if (mcpCompany.country) ewayData.Address1CountryEn = mcpCompany.country;
+
+  if (mcpCompany.note) ewayData.Note = mcpCompany.note;
 
   // Rozšířené atributy
   if (mcpCompany.address1City) ewayData.Address1City = mcpCompany.address1City;
   if (mcpCompany.address1Street) ewayData.Address1Street = mcpCompany.address1Street;
   if (mcpCompany.address1State) ewayData.Address1State = mcpCompany.address1State;
   if (mcpCompany.employeesCount !== undefined) ewayData.EmployeesCount = mcpCompany.employeesCount;
-  if (mcpCompany.identificationNumber) ewayData.IdentificationNumber = mcpCompany.identificationNumber;
   if (mcpCompany.lineOfBusiness) ewayData.LineOfBusiness = mcpCompany.lineOfBusiness;
-  if (mcpCompany.vatNumber) ewayData.VATNumber = mcpCompany.vatNumber;
 
-  // Custom fields
-  if (mcpCompany.ico || mcpCompany.dic) {
-    ewayData.AdditionalFields = {};
-    if (mcpCompany.ico) ewayData.AdditionalFields.cf_ICO = mcpCompany.ico;
-    if (mcpCompany.dic) ewayData.AdditionalFields.cf_DIC = mcpCompany.dic;
+  // ICO a DIC - používáme standardní pole IdentificationNumber a VATNumber
+  // Priorita: ico/dic pokud existuje, jinak identificationNumber/vatNumber
+  if (mcpCompany.ico) {
+    ewayData.IdentificationNumber = mcpCompany.ico;
+  } else if (mcpCompany.identificationNumber) {
+    ewayData.IdentificationNumber = mcpCompany.identificationNumber;
+  }
+
+  if (mcpCompany.dic) {
+    ewayData.VATNumber = mcpCompany.dic;
+  } else if (mcpCompany.vatNumber) {
+    ewayData.VATNumber = mcpCompany.vatNumber;
   }
 
   return ewayData;
@@ -154,9 +164,19 @@ export function createGetByIdParameters(itemGuids: string[]) {
 
 /**
  * Vytvoří parametr objekt pro uložení společnosti (SaveCompany metoda)
+ * Data jdou přímo do transmitObject bez obalení
  */
 export function createSaveParameters(companyData: any) {
   return {
     transmitObject: companyData
+  };
+}
+
+/**
+ * Vytvoří parametr objekt pro smazání společnosti (DeleteCompany metoda)
+ */
+export function createDeleteParameters(itemGuid: string) {
+  return {
+    itemGuid: itemGuid
   };
 } 

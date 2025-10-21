@@ -1,11 +1,12 @@
 import { DealDto, CreateDealDto, EwayDeal } from '../models/deal.dto';
-import { 
-  ewayDealToMcpDeal, 
-  mcpDealToEwayDealTracked, 
+import {
+  ewayDealToMcpDeal,
+  mcpDealToEwayDealTracked,
   mcpDealToEwayDealUpdate,
   createSearchParameters,
   createGetByIdParameters,
-  createSaveParameters
+  createSaveParameters,
+  createDeleteParameters
 } from '../models/deal.mapper';
 import ewayConnector from '../connectors/eway-http.connector';
 import logger from './logger.service';
@@ -186,37 +187,31 @@ export class DealService {
   }
   
   /**
-   * Smazání obchodu (označení jako smazané)
+   * Smazání obchodu pomocí DeleteLeads endpoint
    */
   public async delete(id: string): Promise<void> {
     try {
       logger.debug('Mazání obchodu', { id });
-      
+
       // Nejprve ověříme, že obchod existuje
       const existingDeal = await this.getById(id);
       if (!existingDeal) {
         throw new Error(`Obchod s ID ${id} nebyl nalezen`);
       }
-      
-      // Označíme jako smazané
-      const deleteData = {
-        ItemGUID: id,
-        ItemVersion: existingDeal.itemVersion,
-        IsDeleted: true
-      };
-      
-      const saveParams = createSaveParameters(deleteData);
-      const result = await ewayConnector.callMethod('SaveLeads', saveParams);
-      
+
+      // Použijeme dedikovaný DeleteLeads endpoint
+      const deleteParams = createDeleteParameters(id);
+      const result = await ewayConnector.callMethod('DeleteLeads', deleteParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při mazání obchodu: ${result.Description}`);
       }
-      
-      logger.info('Obchod byl úspěšně smazán', { 
+
+      logger.info('Obchod byl úspěšně smazán', {
         id,
-        projectName: existingDeal.projectName 
+        projectName: existingDeal.projectName
       });
-      
+
     } catch (error) {
       logger.error('Chyba při mazání obchodu', error);
       throw error;

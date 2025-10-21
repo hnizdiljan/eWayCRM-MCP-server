@@ -20,10 +20,15 @@
 - ⚠️ **Contact UPDATE/DELETE** - problémy s eWay-CRM API metodami
 - ⚠️ **Contact Search** - SearchContacts vrací prázdné výsledky
 
+### ✅ **Nově implementováno:**
+- ✅ **OAuth2 autentizace** - kompletní Authorization Code flow s token management 🆕
+- ✅ **Autentizační middleware** - všechny API endpointy jsou chráněny autentizací 🆕
+- ✅ **Token storage v paměti** - singleton OAuth2Service s automatickým refreshem 🆕
+
 ### 🚧 **Není implementováno (mimo scope):**
-- 🚧 **Authentication** - nyní používá API klíč v .env
 - 🚧 **Rate limiting** - pro produkci by bylo vhodné
 - 🚧 **Další entity** - Projekty, Úkoly, atd. (lze implementovat stejným způsobem)
+- 🚧 **Perzistentní token storage** - tokeny jsou jen v RAM (doporučeno Redis/DB pro produkci)
 
 ## 🚀 Rychlé spuštění
 
@@ -33,14 +38,17 @@ npm install
 ```
 
 ### 2. Konfigurace
-Vytvořte `.env` soubor:
+
+#### **OAuth2 autentizace (doporučeno) 🆕**
 ```env
-# eWay-CRM API konfigurace
-EWAY_API_URL=https://trial.eway-crm.com/31994
-EWAY_USERNAME=api
-EWAY_PASSWORD=your-password-here  # 🆕 Doporučeno: plaintext heslo (automaticky se hashuje)
-# nebo
-# EWAY_PASSWORD_HASH=470AE7216203E23E1983EF1851E72947  # MD5 hash hesla
+# eWay-CRM API
+EWAY_API_URL=https://trial.eway-crm.com/31994/API.svc
+EWAY_USERNAME=api  # Nutné i pro OAuth2
+
+# OAuth2 konfigurace
+EWAY_CLIENT_ID=váš-client-id
+EWAY_CLIENT_SECRET=váš-client-secret
+EWAY_REDIRECT_URI=https://oauth.pstmn.io/v1/browser-callback
 
 # Server konfigurace
 PORT=3000
@@ -53,10 +61,22 @@ CLIENT_MACHINE_NAME=MCP-Server
 CLIENT_MACHINE_IDENTIFIER=AA:BB:CC:DD:EE:FF
 ```
 
-**🆕 Automatické hashování hesla:**
-- Můžete použít `EWAY_PASSWORD` s heslem v plaintextu - aplikace si automaticky vytvoří MD5 hash
-- Nebo můžete použít `EWAY_PASSWORD_HASH` s již hashovaným heslem
-- Aplikace automaticky detekuje formát a zpracuje ho správně
+#### **Legacy autentizace (fallback)**
+```env
+# eWay-CRM API konfigurace
+EWAY_API_URL=https://trial.eway-crm.com/31994
+EWAY_USERNAME=api
+EWAY_PASSWORD=your-password-here  # Automaticky se hashuje na MD5
+# nebo
+# EWAY_PASSWORD_HASH=470AE7216203E23E1983EF1851E72947  # Již hashované heslo
+
+# Zbytek stejný jako výše...
+```
+
+**Automatická detekce:**
+- Pokud jsou nastaveny `EWAY_CLIENT_ID` a `EWAY_CLIENT_SECRET` → použije OAuth2
+- Jinak pokud je nastaven `EWAY_PASSWORD` → použije legacy autentizaci
+- Aplikace automaticky detekuje správnou metodu
 
 ### 3. Build & Spuštění
 ```bash
@@ -64,7 +84,24 @@ npm run build
 npm start
 ```
 
-### 4. Test
+### 4. OAuth2 autorizace (pokud používáte OAuth2) 🆕
+```bash
+# Krok 1: Navštivte authorization endpoint v prohlížeči
+http://localhost:3000/api/v1/oauth2/authorize
+
+# Krok 2: Přihlaste se přes Azure AD
+# Budete přesměrováni na eWay-CRM login
+
+# Krok 3: Po úspěšné autorizaci budete přesměrováni zpět
+# Tokeny se automaticky uloží do paměti serveru
+
+# Krok 4: Nyní můžete volat API endpointy
+curl http://localhost:3000/api/v1/companies
+```
+
+**Poznámka:** Tokeny jsou uloženy v paměti (RAM), po restartu serveru je potřeba znovu projít OAuth2 flow.
+
+### 5. Test
 ```bash
 # Automatický test všech endpointů
 .\test-mcp-server.ps1
@@ -80,30 +117,41 @@ curl http://localhost:3000/api/v1/companies?limit=5
 - `GET /health` - Stav serveru a eWay-CRM připojení
 - `GET /api/v1` - Přehled dostupných endpointů
 - `GET /api/v1/test-connection` - Test eWay-CRM připojení
-- `GET /api-docs` - **Swagger UI dokumentace** (nově přidáno! 🆕)
+- `GET /api-docs` - **Swagger UI dokumentace**
 
-### **Companies** 
-- `GET /api/v1/companies` - Seznam společností s pagination
-- `GET /api/v1/companies/:id` - Detail společnosti
-- `POST /api/v1/companies` - Vytvoření společnosti
-- `PUT /api/v1/companies/:id` - Aktualizace společnosti  
-- `DELETE /api/v1/companies/:id` - Smazání společnosti
+### **OAuth2 autentizace** 🆕
+- `GET /api/v1/oauth2/authorize` - Zahájit OAuth2 autorizaci
+- `GET /api/v1/oauth2/callback` - OAuth2 callback (automaticky voláno)
+- `GET /api/v1/oauth2/status` - Stav OAuth2 tokenu
+- `POST /api/v1/oauth2/refresh` - Manuální refresh tokenu
+- `POST /api/v1/oauth2/logout` - Odhlášení (vymazání tokenu)
 
-### **Contacts**
-- `GET /api/v1/contacts` - Seznam kontaktů
-- `GET /api/v1/contacts/:id` - Detail kontaktu  
-- `POST /api/v1/contacts` - Vytvoření kontaktu ✅
-- `PUT /api/v1/contacts/:id` - Aktualizace kontaktu ⚠️
-- `DELETE /api/v1/contacts/:id` - Smazání kontaktu ⚠️
-- `GET /api/v1/contacts/by-company/:companyId` - Kontakty společnosti
+### **Companies** 🔒
+- `GET /api/v1/companies` - Seznam společností s pagination 🔒
+- `GET /api/v1/companies/:id` - Detail společnosti 🔒
+- `POST /api/v1/companies` - Vytvoření společnosti 🔒
+- `PUT /api/v1/companies/:id` - Aktualizace společnosti 🔒
+- `DELETE /api/v1/companies/:id` - Smazání společnosti 🔒
 
-### **Deals** 🆕
-- `GET /api/v1/deals` - Seznam obchodů s pagination
-- `GET /api/v1/deals/:id` - Detail obchodu
-- `POST /api/v1/deals` - Vytvoření obchodu ✅
-- `PUT /api/v1/deals/:id` - Aktualizace obchodu ✅  
-- `DELETE /api/v1/deals/:id` - Smazání obchodu ✅
-- `GET /api/v1/deals/by-company/:companyId` - Obchody společnosti
+🔒 = **Vyžaduje autentizaci** (OAuth2 nebo Legacy)
+
+### **Contacts** 🔒
+- `GET /api/v1/contacts` - Seznam kontaktů 🔒
+- `GET /api/v1/contacts/:id` - Detail kontaktu 🔒
+- `POST /api/v1/contacts` - Vytvoření kontaktu 🔒
+- `PUT /api/v1/contacts/:id` - Aktualizace kontaktu 🔒 ⚠️
+- `DELETE /api/v1/contacts/:id` - Smazání kontaktu 🔒 ⚠️
+- `GET /api/v1/contacts/by-company/:companyId` - Kontakty společnosti 🔒
+
+### **Deals** 🔒
+- `GET /api/v1/deals` - Seznam obchodů s pagination 🔒
+- `GET /api/v1/deals/:id` - Detail obchodu 🔒
+- `POST /api/v1/deals` - Vytvoření obchodu 🔒
+- `PUT /api/v1/deals/:id` - Aktualizace obchodu 🔒
+- `DELETE /api/v1/deals/:id` - Smazání obchodu 🔒
+- `GET /api/v1/deals/by-company/:companyId` - Obchody společnosti 🔒
+
+🔒 = **Vyžaduje autentizaci** | ⚠️ = Může být nestabilní na trial instanci
 
 ### **Query parametry**
 - `limit` - Počet záznamů (default: 25, max: 100)
@@ -139,6 +187,7 @@ src/
 │   ├── deal.dto.ts             # Deal data modely & Zod validace 🆕
 │   └── deal.mapper.ts          # eWay-CRM ↔ Deal mapování 🆕
 ├── middleware/
+│   ├── auth.middleware.ts      # OAuth2/Legacy autentizační middleware 🆕
 │   ├── logging.middleware.ts   # HTTP request logging
 │   └── validation.middleware.ts # Query & body validace
 ├── routes/
@@ -230,23 +279,31 @@ src/
 ### ✅ **Splněno podle zadání:**
 1. ✅ **MCP Server** - REST API server běžící na portu 3000
 2. ✅ **eWay-CRM integrace** - funkční připojení k trial.eway-crm.com
-3. ✅ **Companies CRUD** - kompletní správa společností  
-4. ✅ **Contacts CREATE/READ** - vytváření a čtení kontaktů
-5. ✅ **Deals CRUD** - kompletní správa obchodů/příležitostí 🆕
-6. ✅ **TypeScript** - type-safe kód s DTO modely
-7. ✅ **Error handling** - structured error responses
-8. ✅ **Logging** - comprehensive logging with Winston
-9. ✅ **Validation** - Zod schemas pro všechny endpointy
+3. ✅ **Companies CRUD** - kompletní správa společností 🔒
+4. ✅ **Contacts CREATE/READ** - vytváření a čtení kontaktů 🔒
+5. ✅ **Deals CRUD** - kompletní správa obchodů/příležitostí 🔒
+6. ✅ **OAuth2 autentizace** - Authorization Code flow s token management 🆕
+7. ✅ **Autentizační middleware** - ochrana všech API endpointů 🆕
+8. ✅ **TypeScript** - type-safe kód s DTO modely
+9. ✅ **Error handling** - structured error responses
+10. ✅ **Logging** - comprehensive logging with Winston
+11. ✅ **Validation** - Zod schemas pro všechny endpointy
+
+🔒 = Všechny CRUD endpointy jsou nyní chráněny autentizací!
 
 ### 🏆 **Bonus funkce:**
+- ✅ **OAuth2 Authorization Code Flow** - kompletní implementace 🆕
+- ✅ **In-memory token storage** - OAuth2Service singleton s auto-refresh 🆕
+- ✅ **Autentizační middleware** - requireAuth pro ochranu endpointů 🆕
+- ✅ **Dual auth support** - OAuth2 + Legacy fallback 🆕
 - ✅ **Custom HTTP konektor** - obešel problém s oficiální knihovnou
 - ✅ **Pagination** - standardní REST API pagination
 - ✅ **Health checks** - monitoring endpointy
 - ✅ **Test suite** - automatické testování všech endpointů
 - ✅ **Configuration service** - centralizovaná konfigurace
-- ✅ **Refactoring** - zlepšená struktura kódu, DRY principy 🆕
-- ✅ **Error handling** - jednotné zpracování chyb 🆕
-- ✅ **Utility funkce** - pomocné funkce pro validaci a cache 🆕
+- ✅ **Refactoring** - zlepšená struktura kódu, DRY principy
+- ✅ **Error handling** - jednotné zpracování chyb
+- ✅ **Utility funkce** - pomocné funkce pro validaci a cache
 
 ### 📈 **Připraveno pro rozšíření:**
 - 🔧 **Deals/Opportunities** - implementace stejným způsobem
@@ -261,6 +318,55 @@ MCP Server je **funkční a připravený k použití**. Hlavní cíle zadání b
 
 **Doporučení pro produkci:**
 1. Použít produkční eWay-CRM instanci s kompletnějšími daty
-2. Implementovat authentication a authorization
+2. Implementovat **perzistentní token storage** (Redis/Database místo RAM)
 3. Přidat rate limiting a monitoring
-4. Optimalizovat Contact UPDATE/DELETE functionality 
+4. Optimalizovat Contact UPDATE/DELETE functionality
+5. Zvážit implementaci session-based autentizace pro multi-user prostředí
+
+## 🔐 Autentizace - Jak to funguje
+
+### OAuth2 Flow (doporučeno)
+
+1. **Iniciace autorizace:**
+   ```
+   GET /api/v1/oauth2/authorize
+   → Server vygeneruje authorization URL
+   → Přesměrování na Azure AD login
+   ```
+
+2. **Callback po přihlášení:**
+   ```
+   GET /api/v1/oauth2/callback?code=...
+   → Server vymění code za access_token a refresh_token
+   → Tokeny se uloží do paměti (OAuth2Service)
+   → Automatické přihlášení k eWay-CRM API
+   ```
+
+3. **Použití API:**
+   ```
+   GET /api/v1/companies
+   → requireAuth middleware zkontroluje token
+   → Automatický refresh pokud expiruje
+   → Request pokračuje k API
+   ```
+
+### Token Management v paměti
+
+**OAuth2Service (singleton):**
+- Tokeny uloženy v RAM (`storedToken: StoredToken | null`)
+- Automatický refresh před expirací (60s buffer)
+- Metody: `getValidAccessToken()`, `hasValidToken()`, `clearToken()`
+
+**⚠️ Poznámka:** Po restartu serveru je potřeba znovu projít OAuth2 flow
+
+### Autentizační middleware
+
+Všechny API endpointy (Companies, Contacts, Deals) jsou chráněny `requireAuth` middleware:
+
+```typescript
+// Automaticky kontroluje:
+1. Platnost OAuth2 tokenu (pro OAuth2)
+2. Připojení k eWay-CRM
+3. Automatické přihlášení pokud je potřeba
+4. Friendly error messages (401) s instrukcemi
+``` 

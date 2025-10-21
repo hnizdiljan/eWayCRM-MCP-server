@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import companyController from '../controllers/company.controller';
 import { validateBody, validateQuery, validateParams } from '../middleware/validation.middleware';
+import { requireAuth } from '../middleware/auth.middleware';
 import { CreateCompanyDtoSchema, UpdateCompanyDtoSchema } from '../models/company.dto';
 
 const router = Router();
@@ -49,7 +50,8 @@ const IdParamSchema = z.object({
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', 
+router.get('/',
+  requireAuth,
   validateQuery(GetAllQuerySchema),
   (req, res) => companyController.getAll(req, res)
 );
@@ -90,6 +92,7 @@ router.get('/',
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   (req, res) => companyController.getById(req, res)
 );
@@ -142,6 +145,7 @@ router.get('/:id',
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/',
+  requireAuth,
   validateBody(CreateCompanyDtoSchema),
   (req, res) => companyController.create(req, res)
 );
@@ -202,6 +206,7 @@ router.post('/',
  *               $ref: '#/components/schemas/Error'
  */
 router.put('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   validateBody(UpdateCompanyDtoSchema),
   (req, res) => companyController.update(req, res)
@@ -239,6 +244,7 @@ router.put('/:id',
  *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id',
+  requireAuth,
   validateParams(IdParamSchema),
   (req, res) => companyController.delete(req, res)
 );

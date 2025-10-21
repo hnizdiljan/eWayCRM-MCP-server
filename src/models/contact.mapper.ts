@@ -10,19 +10,19 @@ export function ewayContactToMcpContact(ewayContact: EwayContact): ContactDto {
     lastName: ewayContact.LastName,
     fullName: ewayContact.FileAs || undefined,
     email: ewayContact.Email1Address || undefined,
-    phone: ewayContact.Phone || undefined,
-    mobile: ewayContact.Mobile || undefined,
-    jobTitle: ewayContact.JobTitle || undefined,
+    phone: ewayContact.TelephoneNumber1 || undefined,
+    mobile: ewayContact.TelephoneNumber2 || undefined,
+    jobTitle: ewayContact.Department || undefined, // JobTitle neexistuje v API
     department: ewayContact.Department || undefined,
-    
-    // Adresa
-    address: ewayContact.BusinessAddress || undefined,
+
+    // Adresa - podle Swagger API
+    address: ewayContact.BusinessAddressStreet || undefined,
     city: ewayContact.BusinessAddressCity || undefined,
     zipCode: ewayContact.BusinessAddressPostalCode || undefined,
-    country: ewayContact.BusinessAddressCountry || undefined,
-    
+    country: undefined, // BusinessAddressCountryEn je GUID
+
     // Poznámka
-    note: ewayContact.Body || ewayContact.Note || undefined,
+    note: ewayContact.Note || undefined,
     
     // Propojení se společností
     companyId: ewayContact.Companies_CompanyGuid,
@@ -46,21 +46,21 @@ export function mcpContactToEwayContactTracked(mcpContact: CreateContactDto): an
     FileAs: `${mcpContact.lastName}, ${mcpContact.firstName}`, // Standard formát
   };
 
-  // Volitelná pole
+  // Volitelná pole - názvy podle Swagger dokumentace
   if (mcpContact.email) ewayData.Email1Address = mcpContact.email;
-  if (mcpContact.phone) ewayData.Phone = mcpContact.phone;
-  if (mcpContact.mobile) ewayData.Mobile = mcpContact.mobile;
-  if (mcpContact.jobTitle) ewayData.JobTitle = mcpContact.jobTitle;
+  if (mcpContact.phone) ewayData.TelephoneNumber1 = mcpContact.phone;
+  if (mcpContact.mobile) ewayData.TelephoneNumber2 = mcpContact.mobile;
+  if (mcpContact.jobTitle) ewayData.Department = mcpContact.jobTitle; // JobTitle neexistuje, používáme Department
   if (mcpContact.department) ewayData.Department = mcpContact.department;
-  if (mcpContact.address) ewayData.BusinessAddress = mcpContact.address;
+  if (mcpContact.address) ewayData.BusinessAddressStreet = mcpContact.address;
   if (mcpContact.city) ewayData.BusinessAddressCity = mcpContact.city;
   if (mcpContact.zipCode) ewayData.BusinessAddressPostalCode = mcpContact.zipCode;
-  if (mcpContact.country) ewayData.BusinessAddressCountry = mcpContact.country;
-  if (mcpContact.note) ewayData.Body = mcpContact.note;
-  
-  // Propojení se společností
-  if (mcpContact.companyId) ewayData.CompanyGUID = mcpContact.companyId;
-  // companies_CompanyGuid není součást CreateContactDto, používá se pouze pro čtení
+  // Country je GUID, ne string - vynecháme
+  // if (mcpContact.country) ewayData.BusinessAddressCountryEn = mcpContact.country;
+  if (mcpContact.note) ewayData.Note = mcpContact.note;
+
+  // Propojení se společností - podle Swagger: Companies_CompanyGuid
+  if (mcpContact.companyId) ewayData.Companies_CompanyGuid = mcpContact.companyId;
 
   return ewayData;
 }
@@ -139,5 +139,14 @@ export function createContactGetByIdParameters(itemGuids: string[]) {
 export function createContactSaveParameters(contactData: any) {
   return {
     transmitObject: contactData
+  };
+}
+
+/**
+ * Vytvoří parametr objekt pro smazání kontaktu (DeleteContact metoda)
+ */
+export function createContactDeleteParameters(itemGuid: string) {
+  return {
+    itemGuid: itemGuid
   };
 } 

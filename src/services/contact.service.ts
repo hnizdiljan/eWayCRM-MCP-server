@@ -1,11 +1,12 @@
 import { ContactDto, CreateContactDto, EwayContact } from '../models/contact.dto';
-import { 
-  ewayContactToMcpContact, 
-  mcpContactToEwayContactTracked, 
+import {
+  ewayContactToMcpContact,
+  mcpContactToEwayContactTracked,
   mcpContactToEwayContactUpdate,
   createContactSearchParameters,
   createContactGetByIdParameters,
-  createContactSaveParameters
+  createContactSaveParameters,
+  createContactDeleteParameters
 } from '../models/contact.mapper';
 import ewayConnector from '../connectors/eway-http.connector';
 import logger from './logger.service';
@@ -215,9 +216,10 @@ export class ContactService {
       
       const ewayData = mcpContactToEwayContactUpdate(contactData, id, versionToUse);
       const saveParams = createContactSaveParameters(ewayData);
-      
-      const result = await ewayConnector.callMethod('SaveItem', saveParams);
-      
+
+      // Používáme SaveContact místo SaveItem (tento server nemá univerzální SaveItem)
+      const result = await ewayConnector.callMethod('SaveContact', saveParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         if (result.ReturnCode === 'rcItemConflict') {
           logger.warn('Konflikt verzí při aktualizaci kontaktu', { id, itemVersion: versionToUse });
@@ -225,17 +227,23 @@ export class ContactService {
         }
         throw new Error(`Chyba při aktualizaci kontaktu: ${result.Description}`);
       }
-      
-      if (!result.Data || result.Data.length === 0) {
-        throw new Error('Kontakt byl aktualizován, ale nebyla vrácena data');
+
+      // SaveContact vrací jen Guid, ne Data - musíme načíst kontakt znovu
+      if (!result.Guid) {
+        throw new Error('Kontakt byl aktualizován, ale nebyl vrácen GUID');
       }
-      
-      const updatedContact = ewayContactToMcpContact(result.Data[0]);
-      logger.info('Kontakt byl úspěšně aktualizován', { 
+
+      // Po aktualizaci načteme kontakt podle GUID pro úplná data
+      const updatedContact = await this.getById(result.Guid);
+      if (!updatedContact) {
+        throw new Error('Kontakt byl aktualizován, ale nelze jej načíst');
+      }
+
+      logger.info('Kontakt byl úspěšně aktualizován', {
         id: updatedContact.id,
-        fullName: updatedContact.fullName 
+        fullName: updatedContact.fullName
       });
-      
+
       return updatedContact;
       
     } catch (error) {
@@ -245,40 +253,28 @@ export class ContactService {
   }
   
   /**
-   * Smazání kontaktu (označení jako smazané)
+   * Smazání kontaktu pomocí DeleteContact endpoint
    */
   public async delete(id: string): Promise<void> {
     try {
       logger.debug('Mazání kontaktu', { id });
-      
+
       // Nejprve ověříme, že kontakt existuje
       const existingContact = await this.getById(id);
       if (!existingContact) {
         throw new Error(`Kontakt s ID ${id} nebyl nalezen`);
       }
-      
-      // Označíme kontakt jako smazaný pomocí aktualizace
-      const deleteData = mcpContactToEwayContactUpdate(
-        {
-          firstName: existingContact.firstName || '',
-          lastName: existingContact.lastName || ''
-        },
-        id,
-        existingContact.itemVersion
-      );
-      
-      // Přidáme IsDeleted flag
-      deleteData.IsDeleted = true;
-      
-      const saveParams = createContactSaveParameters(deleteData);
-      const result = await ewayConnector.callMethod('SaveItem', saveParams);
-      
+
+      // Použijeme dedikovaný DeleteContact endpoint
+      const deleteParams = createContactDeleteParameters(id);
+      const result = await ewayConnector.callMethod('DeleteContact', deleteParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při mazání kontaktu: ${result.Description}`);
       }
-      
+
       logger.info('Kontakt byl úspěšně smazán', { id });
-      
+
     } catch (error) {
       logger.error('Chyba při mazání kontaktu', error);
       throw error;
@@ -287,45 +283,25 @@ export class ContactService {
   
   /**
    * Vyhledání kontaktů podle společnosti
+   * Používá GetContacts a provádí filtrování v paměti podle companyId
    */
   public async getByCompanyId(companyId: string, limit: number = 25, offset: number = 0): Promise<PaginatedResult<ContactDto>> {
     try {
       logger.debug('Získávání kontaktů podle společnosti', { companyId, limit, offset });
-      
-      // Použijeme speciální search parametry pro vyhledávání podle společnosti
-      const searchParams = {
-        transmitObject: {
-          CompanyGUID: companyId
-        }
-      };
-      
-      const result = await ewayConnector.callMethod('SearchContacts', searchParams);
-      
-      if (result.ReturnCode !== 'rcSuccess') {
-        throw new Error(`Chyba při získávání kontaktů podle společnosti: ${result.Description}`);
-      }
-      
-      const contacts: ContactDto[] = (result.Data || []).map((ewayContact: EwayContact) =>
-        ewayContactToMcpContact(ewayContact)
-      );
-      
-      const total = result.TotalCount || contacts.length;
-      
-      logger.info(`Získáno ${contacts.length} kontaktů pro společnost`, { 
+
+      // Použijeme getAll s companyId filtrem - ta metoda už má správnou implementaci
+      // s GetContacts a in-memory filtrováním
+      const result = await this.getAll(undefined, limit, offset, 'general', companyId);
+
+      logger.info(`Získáno ${result.data.length} kontaktů pro společnost`, {
         companyId,
-        total, 
+        total: result.total,
         limit,
-        offset 
+        offset
       });
-      
-      return {
-        data: contacts,
-        total,
-        limit,
-        offset,
-        hasMore: (offset + limit) < total
-      };
-      
+
+      return result;
+
     } catch (error) {
       logger.error('Chyba při získávání kontaktů podle společnosti', error);
       throw error;

@@ -1,0 +1,23 @@
+{ 
+  "mcpServers": {
+    "easyproject": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "easyproject-mcp-server"
+      ],
+      "env": {
+        "EASYPROJECT_API_KEY": "a975c463ba01caa7be7910233aaee599f4d20b4c",
+        "EASYPROJECT_BASE_URL": "https://softim.easyproject.cz/"
+      }
+    },
+   "ms365": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@softeria/ms-365-mcp-server",
+        "--force-work-scopes"
+      ]
+    }
+  }
+}

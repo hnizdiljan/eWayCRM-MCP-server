@@ -1,11 +1,12 @@
 import { CompanyDto, CreateCompanyDto, EwayCompany } from '../models/company.dto';
-import { 
-  ewayCompanyToMcpCompany, 
-  mcpCompanyToEwayCompanyTracked, 
+import {
+  ewayCompanyToMcpCompany,
+  mcpCompanyToEwayCompanyTracked,
   mcpCompanyToEwayCompanyUpdate,
   createSearchParameters,
   createGetByIdParameters,
-  createSaveParameters
+  createSaveParameters,
+  createDeleteParameters
 } from '../models/company.mapper';
 import ewayConnector from '../connectors/eway-http.connector';
 import logger from './logger.service';
@@ -153,19 +154,21 @@ export class CompanyService {
       
       const ewayData = mcpCompanyToEwayCompanyTracked(companyData);
       const saveParams = createSaveParameters(ewayData);
-      
+
+      // Používáme SaveCompany - tento server nemá univerzální SaveItem
       const result = await ewayConnector.callMethod('SaveCompany', saveParams);
-      
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při vytváření společnosti: ${result.Description}`);
       }
-      
+
+      // SaveCompany vrací GUID ve stejném formátu jako SaveLeads
       if (!result.Guid) {
         throw new Error('Společnost byla vytvořena, ale nebyl vrácen GUID');
       }
-      
-      // Po vytvoření načteme společnost podle GUID
-      const createdCompany = await this.getById(result.Guid!);
+
+      // Po vytvoření načteme společnost podle GUID pro úplná data
+      const createdCompany = await this.getById(result.Guid);
       if (!createdCompany) {
         throw new Error('Společnost byla vytvořena, ale nelze ji načíst');
       }
@@ -201,9 +204,10 @@ export class CompanyService {
       
       const ewayData = mcpCompanyToEwayCompanyUpdate(companyData, id, versionToUse);
       const saveParams = createSaveParameters(ewayData);
-      
-      const result = await ewayConnector.callMethod('SaveItem', saveParams);
-      
+
+      // Používáme SaveCompany místo SaveItem (tento server nemá univerzální SaveItem)
+      const result = await ewayConnector.callMethod('SaveCompany', saveParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         if (result.ReturnCode === 'rcItemConflict') {
           logger.warn('Konflikt verzí při aktualizaci společnosti', { id, itemVersion: versionToUse });
@@ -211,17 +215,23 @@ export class CompanyService {
         }
         throw new Error(`Chyba při aktualizaci společnosti: ${result.Description}`);
       }
-      
-      if (!result.Data || result.Data.length === 0) {
-        throw new Error('Společnost byla aktualizována, ale nebyla vrácena data');
+
+      // SaveCompany vrací jen Guid, ne Data - musíme načíst společnost znovu
+      if (!result.Guid) {
+        throw new Error('Společnost byla aktualizována, ale nebyl vrácen GUID');
       }
-      
-      const updatedCompany = ewayCompanyToMcpCompany(result.Data[0]);
-      logger.info('Společnost byla úspěšně aktualizována', { 
+
+      // Po aktualizaci načteme společnost podle GUID pro úplná data
+      const updatedCompany = await this.getById(result.Guid);
+      if (!updatedCompany) {
+        throw new Error('Společnost byla aktualizována, ale nelze ji načíst');
+      }
+
+      logger.info('Společnost byla úspěšně aktualizována', {
         id: updatedCompany.id,
-        companyName: updatedCompany.companyName 
+        companyName: updatedCompany.companyName
       });
-      
+
       return updatedCompany;
       
     } catch (error) {
@@ -231,37 +241,31 @@ export class CompanyService {
   }
   
   /**
-   * Smazání společnosti (označení jako smazané)
+   * Smazání společnosti pomocí DeleteCompany endpoint
    */
   public async delete(id: string): Promise<void> {
     try {
       logger.debug('Mazání společnosti', { id });
-      
+
       // Nejprve ověříme, že společnost existuje
       const existingCompany = await this.getById(id);
       if (!existingCompany) {
         throw new Error(`Společnost s ID ${id} nebyla nalezena`);
       }
-      
-      // Označíme jako smazenou
-      const ewayData = {
-        ItemGUID: id,
-        ItemVersion: existingCompany.itemVersion,
-        IsDeleted: true
-      };
-      
-      const saveParams = createSaveParameters(ewayData);
-      const result = await ewayConnector.callMethod('SaveItem', saveParams);
-      
+
+      // Použijeme dedikovaný DeleteCompany endpoint
+      const deleteParams = createDeleteParameters(id);
+      const result = await ewayConnector.callMethod('DeleteCompany', deleteParams);
+
       if (result.ReturnCode !== 'rcSuccess') {
         throw new Error(`Chyba při mazání společnosti: ${result.Description}`);
       }
-      
-      logger.info('Společnost byla úspěšně smazána', { 
+
+      logger.info('Společnost byla úspěšně smazána', {
         id,
-        companyName: existingCompany.companyName 
+        companyName: existingCompany.companyName
       });
-      
+
     } catch (error) {
       logger.error('Chyba při mazání společnosti', error);
       throw error;

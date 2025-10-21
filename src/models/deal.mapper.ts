@@ -126,4 +126,13 @@ export function createSaveParameters(dealData: any): any {
       itemData: dealData
     }
   };
+}
+
+/**
+ * Vytváří parametry pro smazání dealu (DeleteLeads metoda)
+ */
+export function createDeleteParameters(itemGuid: string): any {
+  return {
+    itemGuid: itemGuid
+  };
 } 

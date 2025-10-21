@@ -59,20 +59,30 @@ export interface EwayCompany {
   Phone?: string;
   Email?: string;
   WebPage?: string;
+
+  // Adresní pole podle skutečné API struktury
+  Address1Street?: string;
+  Address1City?: string;
+  Address1PostalCode?: string;
+  Address1State?: string;
+  Address1CountryEn?: string; // GUID země
+
+  // Starší pole (deprecated, ale ponecháváme pro zpětnou kompatibilitu)
   BusinessAddress?: string;
   BusinessAddressCity?: string;
   BusinessAddressPostalCode?: string;
   BusinessAddressCountry?: string;
-  Remark?: string;
+
+  // Poznámky
+  Note?: string;
+  Remark?: string; // deprecated alias pro Note
+
   ItemVersion?: number;
   IsDeleted?: boolean;
   DateCreated?: string;
   DateModified?: string;
-  
+
   // Rozšířené atributy z eWay API
-  Address1City?: string;
-  Address1Street?: string;
-  Address1State?: string;
   EmployeesCount?: number;
   IdentificationNumber?: string;
   LineOfBusiness?: string;
