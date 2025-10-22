@@ -8,6 +8,10 @@ class LoggerService {
     const { level } = configService.config.logging;
     const { nodeEnv } = configService.config.app;
 
+    // Detekce MCP režimu - když není NODE_ENV=production, pravděpodobně běžíme lokálně
+    // V MCP režimu (produkce) MUSÍME psát pouze na stderr, ne stdout!
+    const isMcpMode = nodeEnv === 'production' || process.env.MCP_MODE === 'true';
+
     this.logger = winston.createLogger({
       level,
       format: winston.format.combine(
@@ -20,8 +24,10 @@ class LoggerService {
         })
       ),
       transports: [
-        // Console transport
+        // Console transport - v MCP režimu píše POUZE na stderr!
         new winston.transports.Console({
+          // V MCP režimu MUSÍ vše jít na stderr (stdin/stdout je rezervován pro JSON-RPC)
+          stderrLevels: isMcpMode ? ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] : ['error'],
           format: winston.format.combine(
             winston.format.colorize(),
             winston.format.simple()

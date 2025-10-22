@@ -16,6 +16,9 @@ const options: swaggerJsdoc.Options = {
         - CRUD operace pro Společnosti (Companies)
         - CRUD operace pro Kontakty (Contacts)
         - CRUD operace pro Obchody/Příležitosti (Leads)
+        - CRUD operace pro Úkoly (Tasks)
+        - Správa Uživatelů (Users) - čtení a zápis
+        - Čtení Enum Types (enumerace jako ImportanceEn, TypeEn, StateEn)
         - Fulltextové vyhledávání a filtrování
         - Stránkování výsledků
         - Automatická správa sessions k eWay-CRM
@@ -757,6 +760,18 @@ const options: swaggerJsdoc.Options = {
       {
         name: 'Leads',
         description: 'Správa obchodů/příležitostí (Leads)'
+      },
+      {
+        name: 'Tasks',
+        description: 'Správa úkolů'
+      },
+      {
+        name: 'Users',
+        description: 'Správa uživatelů (bez DELETE operace)'
+      },
+      {
+        name: 'Enum Types',
+        description: 'Číselníky a enumerace (ImportanceEn, TypeEn, StateEn atd.)'
       },
       {
         name: 'System',

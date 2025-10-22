@@ -8,7 +8,9 @@
       "Bash(npm install:*)",
       "WebSearch",
       "Bash(ren:*)",
-      "Bash(ren deal.mapper.ts lead.mapper.ts)"
+      "Bash(ren deal.mapper.ts lead.mapper.ts)",
+      "Bash(findstr:*)",
+      "Bash(dir /b \"C:\\Users\\hnizd\\source\\repos\\hnizdiljan\\eWayCRM-MCP-server\")"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "eway-crm": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\hnizd\\source\\repos\\hnizdiljan\\eWayCRM-MCP-server\\dist\\mcp-server.js"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+
+        "MCP_API_EWAY_API_URL": "https://trial.eway-crm.com/31994",
+
+        "MCP_API_EWAY_CLIENT_ID": "vas-client-id",
+        "MCP_API_EWAY_CLIENT_SECRET": "vas-client-secret",
+        "MCP_API_EWAY_REDIRECT_URI": "http://localhost:7777/api/v1/oauth2/callback",
+
+        "// Server konfigurace": "",
+        "MCP_API_PORT": "7777",
+        "MCP_API_LOG_LEVEL": "info"
+      }
+    }
+  }
+}

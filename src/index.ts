@@ -9,6 +9,9 @@ import ewayConnector from './connectors/eway-http.connector';
 import companyRoutes from './routes/company.routes';
 import contactRoutes from './routes/contact.routes';
 import leadRoutes from './routes/lead.routes';
+import taskRoutes from './routes/task.routes';
+import userRoutes from './routes/user.routes';
+import enumTypeRoutes from './routes/enum-type.routes';
 import oauth2Routes from './routes/oauth2.routes';
 
 const app: Application = express();
@@ -93,6 +96,9 @@ app.use('/api/v1/oauth2', oauth2Routes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/contacts', contactRoutes);
 app.use('/api/v1/leads', leadRoutes);
+app.use('/api/v1/tasks', taskRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/enum-types', enumTypeRoutes);
 
 /**
  * @swagger
@@ -119,13 +125,16 @@ app.use('/api/v1/leads', leadRoutes);
  *                     type: string
  */
 app.get('/api/v1', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'eWay-CRM MCP Server API v1',
     version: configService.config.app.version,
     endpoints: [
       '/api/v1/companies',
-      '/api/v1/contacts', 
-      '/api/v1/deals'
+      '/api/v1/contacts',
+      '/api/v1/leads',
+      '/api/v1/tasks',
+      '/api/v1/users',
+      '/api/v1/enum-types'
     ],
     documentation: '/api-docs'
   });
